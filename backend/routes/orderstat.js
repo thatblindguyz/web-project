@@ -105,4 +105,16 @@ router.get("/", auth, isAdmin, async (req, res) => {
   }
 });
 
+//  get 1 order
+
+router.get("/find/:id", auth, isAdmin, async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+
+    res.status(200).send(order);
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+});
+
 module.exports = router;

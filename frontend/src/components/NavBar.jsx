@@ -16,7 +16,7 @@ const NavBar = () => {
     <nav className="nav-bar">
       {/* Logo */}
       <Link to="/">
-        <h2>OnlineShop</h2>
+        <h2>TECHCOM</h2>
       </Link>
 
       {/* Cart */}
@@ -42,7 +42,6 @@ const NavBar = () => {
       {/* Auth Section */}
       {auth._id ? (
         <Links>
-          {/* ✅ Chỉ admin mới thấy */}
           {auth.isAdmin && (
             <div>
               <Link to="/admin/summary">Admin</Link>

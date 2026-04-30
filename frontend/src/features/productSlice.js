@@ -77,6 +77,30 @@ export const deleteProduct = createAsyncThunk(
 );
 
 /* ============================
+   UPDATE PRODUCT
+============================ */
+
+export const updateProduct = createAsyncThunk(
+  "products/updateProduct",
+
+  async (product, { rejectWithValue }) => {
+    try {
+      const res = await axios.put(
+        `${url}/products/${product.id}`,
+        product,
+        setHeaders(),
+      );
+
+      return res.data;
+    } catch (err) {
+      toast.error("Update failed");
+
+      return rejectWithValue(err.response?.data);
+    }
+  },
+);
+
+/* ============================
    SLICE
 ============================ */
 
@@ -108,7 +132,7 @@ const productsSlice = createSlice({
         state.error = action.payload;
       })
 
-      /* ================= CREATE ================= */
+      /* CREATE  */
 
       .addCase(createProducts.pending, (state) => {
         state.createStatus = "pending";
@@ -128,7 +152,21 @@ const productsSlice = createSlice({
         state.error = action.payload;
       })
 
-      /* ================= DELETE ================= */
+      /* UPDATE */
+
+      .addCase(updateProduct.fulfilled, (state, action) => {
+        const index = state.items.findIndex(
+          (item) => item._id === action.payload._id,
+        );
+
+        if (index !== -1) {
+          state.items[index] = action.payload;
+        }
+
+        toast.success("Product Updated!");
+      })
+
+      /* DELETE */
 
       .addCase(deleteProduct.pending, (state) => {
         state.status = "pending";

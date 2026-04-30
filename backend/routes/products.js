@@ -10,7 +10,7 @@ const router = express.Router();
 ============================ */
 
 router.post("/", isAdmin, async (req, res) => {
-  const { name, category, desc, price, image } = req.body;
+  const { code, name, category, desc, price, image } = req.body;
 
   try {
     if (!image) {
@@ -25,20 +25,12 @@ router.post("/", isAdmin, async (req, res) => {
       folder: "products",
     });
 
-    /* ============================
-       GENERATE PRODUCT CODE
-    ============================ */
+    /* CHECK CODE DUPLICATE */
 
-    const lastProduct = await Product.findOne().sort({ createdAt: -1 });
+    const existingCode = await Product.findOne({ code });
 
-    let newCode = "PRD001";
-
-    if (lastProduct && lastProduct.code) {
-      const lastNumber = parseInt(lastProduct.code.replace("PRD", ""));
-
-      const nextNumber = lastNumber + 1;
-
-      newCode = "PRD" + nextNumber.toString().padStart(3, "0");
+    if (existingCode) {
+      return res.status(400).send("Product code already exists");
     }
 
     /* ============================
@@ -46,7 +38,7 @@ router.post("/", isAdmin, async (req, res) => {
     ============================ */
 
     const product = new Product({
-      code: newCode,
+      code,
       name,
       category,
       desc,
@@ -102,6 +94,44 @@ router.delete("/:id", isAdmin, async (req, res) => {
 
     res.status(200).send(deleted);
   } catch (err) {
+    res.status(500).send(err.message);
+  }
+});
+
+/* ============================
+   UPDATE PRODUCT
+============================ */
+
+router.put("/:id", isAdmin, async (req, res) => {
+  const { code, name, category, desc, price, image } = req.body;
+
+  try {
+    let updatedData = {
+      code,
+      name,
+      category,
+      desc,
+      price,
+    };
+
+    if (image && image.startsWith("data:image")) {
+      const uploadResponse = await cloudinary.uploader.upload(image, {
+        folder: "products",
+      });
+
+      updatedData.image = uploadResponse.secure_url;
+    }
+
+    const updatedProduct = await Product.findByIdAndUpdate(
+      req.params.id,
+      updatedData,
+      { new: true },
+    );
+
+    res.status(200).send(updatedProduct);
+  } catch (err) {
+    console.log(err);
+
     res.status(500).send(err.message);
   }
 });

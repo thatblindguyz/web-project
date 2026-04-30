@@ -57,7 +57,7 @@ router.post("/create-checkout-session", async (req, res) => {
       payment_method_types: ["card"],
 
       shipping_address_collection: {
-        allowed_countries: ["US", "VN"],
+        allowed_countries: ["VN"],
       },
 
       shipping_options: [
@@ -140,10 +140,14 @@ const createOrder = async (customer, data) => {
   try {
     const items = JSON.parse(customer.metadata.cart);
 
-    // lưu dạng productId + quantity (tốt hơn)
     const products = items.map((item) => ({
-      productId: item.id,
-      quantity: item.cartQuantity,
+      id: item.id,
+      name: item.name,
+      category: item.category,
+      desc: item.desc,
+      price: item.price,
+      image: item.image,
+      cartQuantity: item.cartQuantity,
     }));
 
     const newOrder = new Order({
@@ -166,9 +170,9 @@ const createOrder = async (customer, data) => {
 
     const savedOrder = await newOrder.save();
 
-    console.log("✅ Order created:", savedOrder._id);
+    console.log("Order created:", savedOrder._id);
   } catch (err) {
-    console.error("❌ Order creation error:", err.message);
+    console.error("Order creation error:", err.message);
   }
 };
 
@@ -195,9 +199,9 @@ router.post(
           endpointSecret,
         );
 
-        console.log("✅ Webhook verified");
+        console.log("Webhook verified");
       } catch (err) {
-        console.log("⚠️ Webhook signature verification failed.", err.message);
+        console.log("Webhook signature verification failed.", err.message);
 
         return response.sendStatus(400);
       }

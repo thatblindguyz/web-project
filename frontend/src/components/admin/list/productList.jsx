@@ -6,7 +6,10 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import { fetchProducts, deleteProduct } from "../../../features/productSlice";
+
 import { useNavigate } from "react-router-dom";
+
+import ProductEdit from "../edit/productEdit";
 
 /* ============================
    COMPONENT
@@ -42,7 +45,9 @@ const ProductList = () => {
     {
       field: "code",
       headerName: "Code",
-      width: 120,
+      width: 130,
+
+      renderCell: (params) => <CodeCell>#{params.row.code}</CodeCell>,
     },
 
     {
@@ -60,29 +65,45 @@ const ProductList = () => {
     {
       field: "name",
       headerName: "Name",
-      width: 150,
+      width: 170,
+
+      renderCell: (params) => <NameCell>{params.row.name}</NameCell>,
+    },
+
+    {
+      field: "category",
+      headerName: "Category",
+      width: 140,
     },
 
     {
       field: "price",
       headerName: "Price",
-      width: 120,
+      width: 130,
 
       renderCell: (params) => (
-        <span>${params.row.price?.toLocaleString()}</span>
+        <PriceCell>${params.row.price?.toLocaleString()}</PriceCell>
       ),
     },
 
     {
       field: "actions",
       headerName: "Actions",
-      width: 150,
+      width: 230,
 
       renderCell: (params) => (
         <Actions>
+          {/* VIEW */}
+
           <View onClick={() => navigate(`/admin/product/${params.row._id}`)}>
             View
           </View>
+
+          {/* EDIT */}
+
+          <ProductEdit product={params.row} />
+
+          {/* DELETE */}
 
           <Delete onClick={() => handleDelete(params.row._id)}>Delete</Delete>
         </Actions>
@@ -93,20 +114,49 @@ const ProductList = () => {
   /* ================= TABLE ================= */
 
   return (
-    <Paper sx={{ height: 500, width: "100%" }}>
+    <Paper
+      elevation={0}
+      sx={{
+        height: 520,
+        width: "100%",
+        border: "1px solid #E2E8F0",
+        borderRadius: "12px",
+        overflow: "hidden",
+      }}
+    >
       <DataGrid
         rows={products}
         columns={columns}
         getRowId={(row) => row._id}
         pageSizeOptions={[5, 10]}
         checkboxSelection
+        rowHeight={70}
         sx={{
           border: 0,
 
+          "& .MuiDataGrid-columnHeaders": {
+            backgroundColor: "#F8FAFC",
+            borderBottom: "1px solid #E2E8F0",
+          },
+
+          "& .MuiDataGrid-columnHeaderTitle": {
+            fontSize: "15px",
+            fontWeight: 600,
+            color: "#64748B",
+            textTransform: "uppercase",
+          },
+
           "& .MuiDataGrid-cell": {
             display: "flex",
-
             alignItems: "center",
+            borderBottom: "1px solid #F1F5F9",
+            fontSize: "16px",
+            overflow: "visible !important",
+          },
+
+          "& .MuiDataGrid-row:hover": {
+            backgroundColor: "#F8FAFC",
+            overflow: "visible !important",
           },
         }}
       />
@@ -118,68 +168,71 @@ export default ProductList;
 
 /* ================= STYLES ================= */
 
+const CodeCell = styled.span`
+  font-family: monospace;
+  font-size: 15px;
+  color: #64748b;
+`;
+
+const NameCell = styled.span`
+  font-size: 16px;
+  font-weight: 500;
+  color: #1e293b;
+`;
+
+const PriceCell = styled.span`
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+`;
+
 const ImageContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   img {
-    height: 40px;
-
-    width: 40px;
-
+    height: 52px;
+    width: 52px;
     object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
   }
 `;
 
 const Actions = styled.div`
-  width: 100%;
-
   display: flex;
-
   align-items: center;
-
   gap: 6px;
 
   button {
-    display: inline-flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    height: 26px;
-
+    height: 30px;
     padding: 0 10px;
-
-    border: none;
-
-    outline: none;
 
     border-radius: 6px;
 
-    font-size: 12px;
+    font-size: 14px;
 
     font-weight: 500;
 
     cursor: pointer;
 
-    transition: opacity 0.15s;
+    transition: 0.15s;
 
     &:hover {
-      opacity: 0.82;
+      opacity: 0.8;
     }
   }
 `;
 
-const Delete = styled.button`
-  background-color: #fcebeb;
-
-  color: #a32d2d;
-
-  border: 0.5px solid #f7c1c1 !important;
+const View = styled.button`
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  border: 0.5px solid #93c5fd;
 `;
 
-const View = styled.button`
-  background-color: #eaf3de;
-
-  color: #3b6d11;
-
-  border: 0.5px solid #c0dd97 !important;
+const Delete = styled.button`
+  background-color: #fcebeb;
+  color: #a32d2d;
+  border: 0.5px solid #f7c1c1;
 `;
