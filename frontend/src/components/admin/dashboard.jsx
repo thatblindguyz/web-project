@@ -5,20 +5,20 @@ import { FaUsers, FaStore, FaClipboard, FaTachometerAlt } from "react-icons/fa";
 
 const Dashboard = () => {
   const auth = useSelector((state) => state.auth);
-
   if (!auth.isAdmin) return <p>Access denied. Not an Admin!</p>;
 
   return (
     <StyledDashboard>
       <SideNav>
-        <h3>Quick Links</h3>
+        <NavTitle>Quick Links</NavTitle>
+
         <NavLink
           className={({ isActive }) =>
             isActive ? "link-active" : "link-inactive"
           }
           to="/admin/summary"
         >
-          <FaTachometerAlt size={22} /> Summary
+          <FaTachometerAlt /> Summary
         </NavLink>
         <NavLink
           className={({ isActive }) =>
@@ -26,7 +26,7 @@ const Dashboard = () => {
           }
           to="/admin/products"
         >
-          <FaStore size={22} /> Products
+          <FaStore /> Products
         </NavLink>
         <NavLink
           className={({ isActive }) =>
@@ -34,7 +34,7 @@ const Dashboard = () => {
           }
           to="/admin/orders"
         >
-          <FaClipboard size={22} /> Orders
+          <FaClipboard /> Orders
         </NavLink>
         <NavLink
           className={({ isActive }) =>
@@ -42,9 +42,10 @@ const Dashboard = () => {
           }
           to="/admin/users"
         >
-          <FaUsers size={22} /> Users
+          <FaUsers /> Users
         </NavLink>
       </SideNav>
+
       <Content>
         <Outlet />
       </Content>
@@ -54,74 +55,70 @@ const Dashboard = () => {
 
 export default Dashboard;
 
+/* ================= STYLES ================= */
+
 const StyledDashboard = styled.div`
   display: flex;
   height: 100vh;
 `;
 
 const SideNav = styled.div`
-  border-right: 1px solid gray;
-
+  border-right: 1px solid #e2e8f0;
   height: calc(100vh - 70px);
-
   position: fixed;
-
   overflow-y: auto;
-
   width: 220px;
-
   display: flex;
   flex-direction: column;
-
-  padding: 2rem;
-
-  h3 {
-    margin-bottom: 1.5rem;
-
-    text-transform: uppercase;
-
-    font-size: 18px;
-  }
+  padding: 1.8rem 1.2rem;
+  background: #ffffff;
 
   a {
     display: flex;
     align-items: center;
-
-    gap: 12px;
-
+    gap: 10px;
     text-decoration: none;
-
-    margin-bottom: 1.2rem;
-
-    font-size: 16px;
-
-    padding: 8px 10px;
-
-    border-radius: 6px;
+    margin-bottom: 4px;
+    font-size: 18px;
+    font-weight: 500;
+    color: #64748b;
+    padding: 9px 12px;
+    border-radius: 8px;
+    transition: 0.15s;
 
     svg {
-      font-size: 20px;
+      font-size: 19px;
+      flex-shrink: 0;
     }
   }
 
   .link-active {
-    background: rgba(102, 108, 255, 0.2);
-    font-weight: 700;
+    background-color: #eff6ff;
+    color: #1d4ed8;
+    font-weight: 600;
+    border: 0.5px solid #93c5fd;
   }
 
   .link-inactive:hover {
-    background: rgba(102, 108, 255, 0.1);
+    background-color: #f8fafc;
+    color: #1e293b;
   }
+`;
+
+const NavTitle = styled.h3`
+  font-size: 14px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 14px;
+  padding: 0 12px;
 `;
 
 const Content = styled.div`
   margin-left: 220px;
-
   padding: 2rem 3rem;
-
   width: 100%;
-
   min-height: 100vh;
-
-  background: #f5f6fa;
+  background: #f8fafc;
 `;

@@ -121,6 +121,15 @@ const OrderDetail = () => {
               </Value>
             </Field>
             <Field>
+              <Label>Created Date</Label>
+
+              <Value>
+                {order.createdAt
+                  ? new Date(order.createdAt).toLocaleString("en-GB")
+                  : "—"}
+              </Value>
+            </Field>
+            <Field>
               <Label>Delivery</Label>
               <Value>
                 <StatusBadge
