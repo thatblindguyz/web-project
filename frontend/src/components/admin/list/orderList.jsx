@@ -4,11 +4,14 @@ import Paper from "@mui/material/Paper";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { fetchOrders } from "../../../features/orderSlice";
+import { fetchOrders } from "../../../features/order/OrderSlice";
+import axios from "axios";
+import { url, setHeaders } from "../../../features/api";
 
 /* ============================
    HELPERS
 ============================ */
+
 const deliveryColors = {
   pending: { bg: "#FEF9EC", color: "#92600A", border: "#FAC765" },
   processing: { bg: "#EEF2FF", color: "#3730A3", border: "#A5B4FC" },
@@ -45,6 +48,22 @@ const OrderList = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { items: orders } = useSelector((state) => state.orders);
+  const updateStatus = async (id, status) => {
+    const confirmAction = window.confirm(
+      `Are you sure to set this order to ${status}?`,
+    );
+
+    if (!confirmAction) return;
+
+    try {
+      await axios.put(`${url}/orders/delivery/${id}`, { status }, setHeaders());
+
+      // reload lại data
+      dispatch(fetchOrders());
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   /* ================= FETCH ORDERS ================= */
   useEffect(() => {
@@ -112,12 +131,35 @@ const OrderList = () => {
     {
       field: "actions",
       headerName: "Actions",
-      width: 120,
+      width: 260,
       renderCell: (params) => (
         <Actions>
           <View onClick={() => navigate(`/admin/order/${params.row._id}`)}>
             View
           </View>
+
+          {/* DELIVERY BUTTON */}
+
+          {params.row.delivery_status !== "delivering" &&
+            params.row.delivery_status !== "delivered" &&
+            params.row.delivery_status !== "cancelled" && (
+              <ActionBtn
+                onClick={() => updateStatus(params.row._id, "delivering")}
+              >
+                Delivery
+              </ActionBtn>
+            )}
+
+          {/* COMPLETE BUTTON */}
+
+          {params.row.delivery_status !== "delivered" &&
+            params.row.delivery_status !== "cancelled" && (
+              <ActionBtnGreen
+                onClick={() => updateStatus(params.row._id, "delivered")}
+              >
+                Complete
+              </ActionBtnGreen>
+            )}
         </Actions>
       ),
     },
@@ -189,12 +231,6 @@ const OrderId = styled.span`
   letter-spacing: 0.04em;
 `;
 
-const UserCell = styled.span`
-  font-size: 17px;
-  font-weight: 500;
-  color: #1e293b;
-`;
-
 const Amount = styled.span`
   font-size: 17px;
   font-weight: 600;
@@ -237,6 +273,44 @@ const View = styled.button`
   cursor: pointer;
   transition: opacity 0.15s;
 
+  &:hover {
+    opacity: 0.82;
+  }
+`;
+
+const ActionBtn = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  padding: 0 12px;
+  background-color: #eef2ff;
+  color: #3730a3;
+  border: 0.5px solid #a5b4fc;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  &:hover {
+    opacity: 0.82;
+  }
+`;
+
+const ActionBtnGreen = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  padding: 0 12px;
+  background-color: #e1f5ee;
+  color: #0f6e56;
+  border: 0.5px solid #5dcaa5;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.15s;
   &:hover {
     opacity: 0.82;
   }

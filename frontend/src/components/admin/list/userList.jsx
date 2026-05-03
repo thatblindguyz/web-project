@@ -3,7 +3,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import Paper from "@mui/material/Paper";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchUsers, deleteUser } from "../../../features/userSlice";
+import { fetchUsers, deleteUser } from "../../../features/user/UserSlice";
 
 /* ============================
    COMPONENT
@@ -39,6 +39,13 @@ const UserList = () => {
       headerName: "Email",
       width: 200,
       renderCell: (params) => <EmailCell>{params.row.email}</EmailCell>,
+    },
+    {
+      field: "createdAt",
+      headerName: "Joined",
+      width: 150,
+      renderCell: (params) =>
+        new Date(params.row.createdAt).toLocaleDateString("vi-VN"),
     },
     {
       field: "actions",

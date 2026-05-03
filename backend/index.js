@@ -9,13 +9,13 @@ require("dotenv").config();
    ROUTES IMPORT
 ============================ */
 
-const stripeRoute = require("./routes/stripe");
-const productRoute = require("./routes/products");
-const registerRoute = require("./routes/register");
-const loginRoute = require("./routes/login");
-const userStats = require("./routes/userstat");
-const orderStats = require("./routes/orderstat");
-const incomeStats = require("./routes/incomestat");
+const stripeRoute = require("./routes/StripeRoute");
+const productRoute = require("./routes/ProductRoute");
+const registerRoute = require("./routes/RegisterRoute");
+const loginRoute = require("./routes/LoginRoute");
+const userStats = require("./stats/UserStat");
+const orderStats = require("./stats/OrderStat");
+const incomeStats = require("./stats/IncomeStat");
 
 const app = express();
 

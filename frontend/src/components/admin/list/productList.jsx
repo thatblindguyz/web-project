@@ -5,11 +5,13 @@ import Paper from "@mui/material/Paper";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import { fetchProducts, deleteProduct } from "../../../features/productSlice";
+import {
+  fetchProducts,
+  deleteProduct,
+} from "../../../features/product/ProductSlice";
 
 import { useNavigate } from "react-router-dom";
-
-import ProductEdit from "../edit/productEdit";
+import ProductEdit from "../edit/ProductEdit";
 
 /* ============================
    COMPONENT

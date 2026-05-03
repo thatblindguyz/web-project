@@ -8,8 +8,9 @@ import {
   DialogTitle,
   MenuItem,
 } from "@mui/material";
+
 import { useDispatch } from "react-redux";
-import { updateProduct } from "../../../features/productSlice";
+import { updateProduct } from "../../../features/product/ProductSlice";
 
 const ProductEdit = ({ product }) => {
   const dispatch = useDispatch();

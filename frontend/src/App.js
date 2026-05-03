@@ -4,29 +4,38 @@ import "react-toastify/dist/ReactToastify.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 
-import NavBar from "./components/NavBar";
-import Cart from "./components/Cart";
-import Home from "./components/Home";
-import NotFound from "./components/NotFound";
+/* USER UI */
 
-import Login from "./components/authentication/login";
-import Register from "./components/authentication/register";
-import CheckoutSuccess from "./components/authentication/CheckOutSuccess";
+import NavBar from "./components/homeUI/layout/NavBar";
 
-/* ADMIN IMPORTS */
+import Home from "./components/homeUI/pages/Home";
+import Cart from "./components/homeUI/pages/Cart";
+import NotFound from "./components/homeUI/pages/NotFound";
 
-import Dashboard from "./components/admin/dashboard";
-import ProductAdmin from "./components/admin/productAdmin";
-import Summary from "./components/admin/summary";
-import CreateProduct from "./components/admin/createProduct";
+/* AUTH */
 
-import ProductList from "./components/admin/list/productList";
+import Login from "./components/auth/Login";
+import Register from "./components/auth/Register";
+import CheckoutSuccess from "./components/auth/CheckOutSuccess";
 
-import Orders from "./components/admin/orderAdmin";
-import Users from "./components/admin/userAdmin";
-import ProductDetail from "./components/admin/detail/productDetail";
-import UserDetail from "./components/admin/detail/userDetail";
-import OrderDetail from "./components/admin/detail/orderDetail";
+/* USER ORDER ⭐ */
+import UserOrderDetail from "./components/homeUI/userOrder/UserOrderDetail";
+import MyOrders from "./components/homeUI/userOrder/MyOrders";
+
+/* ADMIN */
+
+import Dashboard from "./components/admin/dashboard/Dashboard";
+import ProductAdmin from "./components/admin/page/ProductAdmin";
+import OrderAdmin from "./components/admin/page/OrderAdmin";
+import UserAdmin from "./components/admin/page/UserAdmin";
+
+import Summary from "./components/admin/dashboard/Summary";
+import ProductList from "./components/admin/list/ProductList";
+import CreateProduct from "./components/admin/create/CreateProduct";
+
+import ProductDetail from "./components/admin/detail/ProductDetail";
+import UserDetail from "./components/admin/detail/UserDetail";
+import OrderDetail from "./components/admin/detail/OrderDetail";
 
 function App() {
   return (
@@ -37,38 +46,40 @@ function App() {
         <NavBar />
 
         <Routes>
-          {/* ================= USER ROUTES ================= */}
+          {/* USER */}
 
           <Route path="/" element={<Home />} />
-
           <Route path="/cart" element={<Cart />} />
 
+          {/* LIST ORDERS */}
+          <Route path="/my-orders" element={<MyOrders />} />
+
+          {/* ORDER DETAIL */}
+          <Route path="/order/:id" element={<UserOrderDetail />} />
+
+          {/* AUTH */}
+
           <Route path="/register" element={<Register />} />
-
           <Route path="/login" element={<Login />} />
-
           <Route path="/checkout-success" element={<CheckoutSuccess />} />
 
-          {/* ================= ADMIN ROUTES ================= */}
+          {/* ADMIN */}
 
           <Route path="/admin" element={<Dashboard />}>
-            <Route path="product/:id" element={<ProductDetail />} />
-            <Route path="user/:id" element={<UserDetail />} />
-            <Route path="order/:id" element={<OrderDetail />} />
             <Route path="summary" element={<Summary />} />
 
             <Route path="products" element={<ProductAdmin />}>
               <Route index element={<ProductList />} />
-
               <Route path="create-product" element={<CreateProduct />} />
             </Route>
 
-            <Route path="orders" element={<Orders />} />
+            <Route path="product/:id" element={<ProductDetail />} />
+            <Route path="user/:id" element={<UserDetail />} />
+            <Route path="order/:id" element={<OrderDetail />} />
 
-            <Route path="users" element={<Users />} />
+            <Route path="orders" element={<OrderAdmin />} />
+            <Route path="users" element={<UserAdmin />} />
           </Route>
-
-          {/* ================= NOT FOUND ================= */}
 
           <Route path="*" element={<NotFound />} />
         </Routes>

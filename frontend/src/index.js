@@ -9,13 +9,17 @@ import { configureStore } from "@reduxjs/toolkit";
    IMPORT SLICES
 ============================ */
 
-import authReducer, { loadUser } from "./features/authSlice";
-import productReducer from "./features/productSlice";
-import cartReducer, { getTotals } from "./features/cartSlice";
-import { productAPI } from "./features/productAPI";
+import authReducer, { loadUser } from "./features/auth/AuthSlice";
 
-import userReducer from "./features/userSlice";
-import orderReducer from "./features/orderSlice";
+import productReducer from "./features/product/ProductSlice";
+
+import cartReducer, { getTotals } from "./features/cart/CartSlice";
+
+import { productAPI } from "./features/product/ProductAPI";
+
+import userReducer from "./features/user/UserSlice";
+
+import orderReducer from "./features/order/OrderSlice";
 
 /* ============================
    CONFIGURE STORE
