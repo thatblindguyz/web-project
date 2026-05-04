@@ -10,7 +10,16 @@ const router = express.Router();
 ============================ */
 
 router.post("/", isAdmin, async (req, res) => {
-  const { code, name, category, desc, price, image } = req.body;
+  const {
+    code,
+    name,
+    category,
+    shortDesc, // ⭐ THÊM DÒNG NÀY
+    desc,
+    price,
+    image,
+    quantity,
+  } = req.body;
 
   try {
     if (!image) {
@@ -41,8 +50,10 @@ router.post("/", isAdmin, async (req, res) => {
       code,
       name,
       category,
+      shortDesc,
       desc,
       price,
+      quantity,
       image: uploadResponse.secure_url,
     });
 
@@ -103,15 +114,18 @@ router.delete("/:id", isAdmin, async (req, res) => {
 ============================ */
 
 router.put("/:id", isAdmin, async (req, res) => {
-  const { code, name, category, desc, price, image } = req.body;
+  const { code, name, category, shortDesc, desc, price, image, quantity } =
+    req.body;
 
   try {
     let updatedData = {
       code,
       name,
       category,
+      shortDesc,
       desc,
       price,
+      quantity,
     };
 
     if (image && image.startsWith("data:image")) {

@@ -1,7 +1,7 @@
 import { useGetProductsQuery } from "../../../features/product/ProductAPI";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addToCart, getTotals } from "../../../features/cart/CartSlice";
-import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
   const { data, error, isLoading } = useGetProductsQuery();
@@ -10,6 +10,7 @@ const Home = () => {
   console.log(auth);
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleAddToCart = (product) => {
     dispatch(addToCart(product));
@@ -28,7 +29,12 @@ const Home = () => {
 
           <div className="products">
             {data?.map((product) => (
-              <div key={product._id} className="product">
+              <div
+                key={product._id}
+                className="product"
+                onClick={() => navigate(`/product/${product._id}`)}
+                style={{ cursor: "pointer" }}
+              >
                 <img
                   src={product.image}
                   alt={product.name}
@@ -37,16 +43,45 @@ const Home = () => {
 
                 <h3>{product.name}</h3>
 
-                <p className="desc">{product.desc}</p>
+                {/* ⭐ SHORT DESCRIPTION */}
+                <p
+                  style={{
+                    fontSize: "14px",
+                    color: "#64748b",
+                    margin: "4px 0",
+                  }}
+                >
+                  {product.shortDesc || "No description"}
+                </p>
 
                 <p className="price">${product.price}</p>
 
-                <button
-                  className="add-btn"
-                  onClick={() => handleAddToCart(product)}
-                >
-                  Add to Cart
-                </button>
+                {/* STOCK */}
+                <p>Stock: {product.quantity}</p>
+
+                {/* BUTTON */}
+                {product.quantity === 0 ? (
+                  <button
+                    className="add-btn"
+                    disabled
+                    style={{
+                      background: "#ccc",
+                      cursor: "not-allowed",
+                    }}
+                  >
+                    Out of Stock
+                  </button>
+                ) : (
+                  <button
+                    className="add-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAddToCart(product);
+                    }}
+                  >
+                    Add to Cart
+                  </button>
+                )}
               </div>
             ))}
           </div>

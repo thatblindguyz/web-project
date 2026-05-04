@@ -17,6 +17,11 @@ const ProductSchema = new mongoose.Schema(
       required: true,
     },
 
+    shortDesc: {
+      type: String,
+      required: true,
+    },
+
     desc: {
       type: String,
       required: true,
@@ -30,6 +35,12 @@ const ProductSchema = new mongoose.Schema(
     image: {
       type: String,
       required: true,
+    },
+
+    quantity: {
+      type: Number,
+      required: true,
+      default: 0,
     },
   },
   { timestamps: true },

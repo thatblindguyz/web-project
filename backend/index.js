@@ -21,11 +21,7 @@ const app = express();
 
 app.use(cors());
 
-/* 
-   STRIPE WEBHOOK
- */
-
-app.use("/api/webhook", express.raw({ type: "application/json" }));
+app.use("/api/stripe", stripeRoute);
 
 /* ============================
    BODY PARSER
@@ -51,7 +47,6 @@ app.use(
 app.use("/api", registerRoute);
 app.use("/api", loginRoute);
 app.use("/api/products", productRoute);
-app.use("/api", stripeRoute);
 app.use("/api/users", userStats);
 app.use("/api/orders", orderStats);
 app.use("/api/income", incomeStats);

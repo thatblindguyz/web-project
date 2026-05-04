@@ -8,13 +8,7 @@ const CheckoutSuccess = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    /* Clear cart */
-
     dispatch(clearCart());
-
-    /* Recalculate totals */
-
-    dispatch(getTotals());
 
     setTimeout(() => {
       navigate("/");

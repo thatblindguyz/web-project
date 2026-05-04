@@ -67,9 +67,18 @@ const ProductDetail = () => {
               <Label>Description</Label>
               <Value>{product.desc}</Value>
             </Field>
-            <Field>
-              <Label>Price</Label>
-              <PriceValue>${product.price?.toLocaleString()}</PriceValue>
+            <Field style={{ justifyContent: "space-between" }}>
+              {/* PRICE */}
+              <div style={{ display: "flex", gap: "8px" }}>
+                <Label>Price</Label>
+                <PriceValue>${product.price?.toLocaleString()}</PriceValue>
+              </div>
+
+              {/* QUANTITY */}
+              <div style={{ display: "flex", gap: "8px" }}>
+                <Label>Stock</Label>
+                <Value>{product.quantity}</Value>
+              </div>
             </Field>
           </FieldList>
         </InfoSection>

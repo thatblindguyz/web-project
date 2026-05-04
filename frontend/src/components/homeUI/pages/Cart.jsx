@@ -84,7 +84,7 @@ const Cart = () => {
                   <img src={cartItem.image} alt={cartItem.title} />
                   <div>
                     <h3>{cartItem.name}</h3>
-                    <p>{cartItem.desc}</p>
+                    <p>{cartItem.shortDesc || cartItem.desc}</p>
                     <button onClick={() => handleRemoveFromCart(cartItem)}>
                       Remove
                     </button>

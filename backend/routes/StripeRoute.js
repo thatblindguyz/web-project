@@ -1,6 +1,7 @@
 const express = require("express");
 const Stripe = require("stripe");
 const Order = require("../models/order");
+const Product = require("../models/product");
 
 require("dotenv").config();
 
@@ -12,15 +13,18 @@ const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
    CREATE CHECKOUT SESSION
 ============================ */
 
-router.post("/create-checkout-session", async (req, res) => {
+router.post("/create-checkout-session", express.json(), async (req, res) => {
   try {
-    console.log("Items received:", req.body.items);
-
     // Create customer
     const customer = await stripe.customers.create({
       metadata: {
         userId: req.body.userId,
-        cart: JSON.stringify(req.body.items),
+        cart: JSON.stringify(
+          req.body.items.map((item) => ({
+            id: item._id,
+            quantity: item.cartQuantity,
+          })),
+        ),
       },
     });
 
@@ -39,7 +43,7 @@ router.post("/create-checkout-session", async (req, res) => {
               : `${process.env.BASE_URL}/${item.image}`,
           ],
 
-          description: item.desc,
+          description: item.shortDesc || item.desc,
 
           metadata: {
             id: item.id,
@@ -140,15 +144,29 @@ const createOrder = async (customer, data) => {
   try {
     const items = JSON.parse(customer.metadata.cart);
 
-    const products = items.map((item) => ({
-      id: item.id,
-      name: item.name,
-      category: item.category,
-      desc: item.desc,
-      price: item.price,
-      image: item.image,
-      cartQuantity: item.cartQuantity,
-    }));
+    const products = [];
+
+    for (const item of items) {
+      const product = await Product.findById(item.id);
+
+      if (!product) continue;
+
+      products.push({
+        id: product._id,
+        name: product.name,
+        category: product.category,
+        shortDesc: product.shortDesc,
+        desc: product.desc,
+        price: product.price,
+        image: product.image,
+        cartQuantity: item.quantity,
+      });
+
+      if (product.quantity >= item.quantity) {
+        product.quantity -= item.quantity;
+        await product.save();
+      }
+    }
 
     const newOrder = new Order({
       userId: customer.metadata.userId,

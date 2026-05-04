@@ -89,6 +89,21 @@ const ProductList = () => {
     },
 
     {
+      field: "quantity",
+      headerName: "Stock",
+      width: 120,
+
+      renderCell: (params) => (
+        <StockCell
+          $low={params.row.quantity <= 3 && params.row.quantity > 0}
+          $out={params.row.quantity === 0}
+        >
+          {params.row.quantity}
+        </StockCell>
+      ),
+    },
+
+    {
       field: "actions",
       headerName: "Actions",
       width: 230,
@@ -132,7 +147,7 @@ const ProductList = () => {
         getRowId={(row) => row._id}
         pageSizeOptions={[5, 10]}
         checkboxSelection
-        rowHeight={70}
+        rowHeight={90}
         sx={{
           border: 0,
 
@@ -180,6 +195,9 @@ const NameCell = styled.span`
   font-size: 16px;
   font-weight: 500;
   color: #1e293b;
+  white-space: normal;
+  line-height: 1.4;
+  word-break: break-word;
 `;
 
 const PriceCell = styled.span`
@@ -237,4 +255,16 @@ const Delete = styled.button`
   background-color: #fcebeb;
   color: #a32d2d;
   border: 0.5px solid #f7c1c1;
+`;
+
+const StockCell = styled.span`
+  font-size: 15px;
+  font-weight: 600;
+
+  color: ${(p) =>
+    p.$out
+      ? "#dc2626" // đỏ (hết hàng)
+      : p.$low
+        ? "#d97706" // cam (ít hàng)
+        : "#16a34a"}; // xanh (còn nhiều)
 `;

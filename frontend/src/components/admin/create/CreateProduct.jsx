@@ -16,9 +16,11 @@ const CreateProduct = () => {
   const [category, setCategory] = useState("");
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
-  const [desc, setDesc] = useState("");
+  const [desc, setDesc] = useState(""); // FULL DESC
+  const [shortDesc, setShortDesc] = useState(""); // ⭐ NEW
   const [priceError, setPriceError] = useState("");
   const [code, setCode] = useState("");
+  const [quantity, setQuantity] = useState("");
 
   /* ================= IMAGE UPLOAD ================= */
   const handleProductImageUpload = (e) => {
@@ -53,7 +55,9 @@ const CreateProduct = () => {
         name,
         category,
         price,
-        desc,
+        shortDesc, // ⭐ ADD
+        desc, // full
+        quantity,
         image: productImg,
       }),
     );
@@ -64,13 +68,14 @@ const CreateProduct = () => {
     setCategory("");
     setPrice("");
     setDesc("");
+    setShortDesc("");
     setProductImg("");
+    setQuantity("");
   };
 
   /* ================= UI ================= */
   return (
     <Wrapper>
-      {/* ===== HEADER ===== */}
       <Header>
         <Left>
           <BackButton onClick={() => navigate(-1)}>← Back</BackButton>
@@ -78,16 +83,14 @@ const CreateProduct = () => {
         </Left>
       </Header>
 
-      {/* ===== MAIN CARD ===== */}
       <ContentRow>
-        {/* FORM */}
         <Card>
           <CardTitle>Product Info</CardTitle>
+
           <StyledForm onSubmit={handleSubmit} noValidate>
             <FieldGroup>
               <FieldLabel>Product Image</FieldLabel>
               <FileInput
-                id="imgUpload"
                 accept="image/*"
                 type="file"
                 onChange={handleProductImageUpload}
@@ -116,7 +119,6 @@ const CreateProduct = () => {
               <FieldLabel>Product Code</FieldLabel>
               <StyledInput
                 type="text"
-                placeholder="e.g. RTX4090"
                 value={code}
                 onChange={(e) => setCode(e.target.value.toUpperCase())}
                 required
@@ -127,7 +129,6 @@ const CreateProduct = () => {
               <FieldLabel>Name</FieldLabel>
               <StyledInput
                 type="text"
-                placeholder="e.g. RTX 4090"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
@@ -138,9 +139,7 @@ const CreateProduct = () => {
               <FieldLabel>Price ($)</FieldLabel>
               <StyledInput
                 type="number"
-                placeholder="e.g. 3999"
                 value={price}
-                step="0.01"
                 onChange={(e) => {
                   setPrice(e.target.value);
                   if (e.target.value > 0) setPriceError("");
@@ -151,10 +150,33 @@ const CreateProduct = () => {
             </FieldGroup>
 
             <FieldGroup>
-              <FieldLabel>Description</FieldLabel>
+              <FieldLabel>Quantity</FieldLabel>
+              <StyledInput
+                type="number"
+                value={quantity}
+                onChange={(e) => setQuantity(e.target.value)}
+                required
+              />
+            </FieldGroup>
+
+            {/* ⭐ SHORT DESC */}
+            <FieldGroup>
+              <FieldLabel>Short Description</FieldLabel>
               <StyledInput
                 type="text"
-                placeholder="Short description..."
+                placeholder="Short description"
+                value={shortDesc}
+                onChange={(e) => setShortDesc(e.target.value)}
+                required
+              />
+            </FieldGroup>
+
+            {/* ⭐ FULL DESC */}
+            <FieldGroup>
+              <FieldLabel>Full Description</FieldLabel>
+              <StyledTextarea
+                rows={6}
+                placeholder="Enter full product specs..."
                 value={desc}
                 onChange={(e) => setDesc(e.target.value)}
                 required
@@ -167,7 +189,6 @@ const CreateProduct = () => {
           </StyledForm>
         </Card>
 
-        {/* IMAGE PREVIEW */}
         <Card>
           <CardTitle>Image Preview</CardTitle>
           <ImagePreview>
@@ -187,6 +208,16 @@ const CreateProduct = () => {
 };
 
 export default CreateProduct;
+
+/* ================= STYLES ================= */
+
+const StyledTextarea = styled.textarea`
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  font-size: 14px;
+  resize: vertical;
+`;
 
 /* ================= STYLES ================= */
 const Wrapper = styled.div`

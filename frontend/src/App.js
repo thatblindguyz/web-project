@@ -1,16 +1,15 @@
 import "./App.css";
 import "react-toastify/dist/ReactToastify.css";
-
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 
 /* USER UI */
 
 import NavBar from "./components/homeUI/layout/NavBar";
-
 import Home from "./components/homeUI/pages/Home";
 import Cart from "./components/homeUI/pages/Cart";
 import NotFound from "./components/homeUI/pages/NotFound";
+import ProductPage from "./components/homeUI/pages/ProductPage";
 
 /* AUTH */
 
@@ -18,7 +17,8 @@ import Login from "./components/auth/Login";
 import Register from "./components/auth/Register";
 import CheckoutSuccess from "./components/auth/CheckOutSuccess";
 
-/* USER ORDER ⭐ */
+/* USER ORDER  */
+
 import UserOrderDetail from "./components/homeUI/userOrder/UserOrderDetail";
 import MyOrders from "./components/homeUI/userOrder/MyOrders";
 
@@ -50,6 +50,7 @@ function App() {
 
           <Route path="/" element={<Home />} />
           <Route path="/cart" element={<Cart />} />
+          <Route path="/product/:id" element={<ProductPage />} />
 
           {/* LIST ORDERS */}
           <Route path="/my-orders" element={<MyOrders />} />
