@@ -33,82 +33,63 @@ const Summary = () => {
   }
 
   /* ================= USER STATS ================= */
-
   useEffect(() => {
     async function fetchData() {
       try {
         const res = await axios.get(`${url}/user-stats/stats`, setHeaders());
-
         const sorted = res.data.sort(compare);
-
         setUsers(sorted);
-
         if (sorted.length >= 2) {
           const percent =
             ((sorted[0].total - sorted[1].total) / sorted[1].total) * 100;
-
           setUsersPerc(Math.floor(percent));
         }
       } catch (err) {
         console.log(err);
       }
     }
-
     fetchData();
   }, []);
 
   /* ================= ORDER STATS ================= */
-
   useEffect(() => {
     async function fetchData() {
       try {
         const res = await axios.get(`${url}/orders/stats`, setHeaders());
-
         const sorted = res.data.sort(compare);
-
         setOrders(sorted);
-
         if (sorted.length >= 2) {
           const percent =
             ((sorted[0].total - sorted[1].total) / sorted[1].total) * 100;
-
           setOrdersPerc(Math.floor(percent));
         }
       } catch (err) {
         console.log(err);
       }
     }
-
     fetchData();
   }, []);
 
   /* ================= INCOME STATS ================= */
-
   useEffect(() => {
     async function fetchData() {
       try {
         const res = await axios.get(`${url}/income/stats`, setHeaders());
-
         const sorted = res.data.sort(compare);
-
         setIncome(sorted);
-
         if (sorted.length >= 2) {
           const percent =
             ((sorted[0].total - sorted[1].total) / sorted[1].total) * 100;
-
           setIncomePerc(Math.floor(percent));
         }
       } catch (err) {
         console.log(err);
       }
     }
-
     fetchData();
   }, []);
 
   /* ================= WIDGET DATA ================= */
-
   const data = [
     {
       icon: <FaUsers />,
@@ -117,7 +98,6 @@ const Summary = () => {
       percentage: usersPerc,
       onClick: () => navigate("/admin/users"),
     },
-
     {
       icon: <FaClipboard />,
       digit: orders[0]?.total,
@@ -125,7 +105,6 @@ const Summary = () => {
       percentage: ordersPerc,
       onClick: () => navigate("/admin/orders"),
     },
-
     {
       icon: <FaChartBar />,
       digit: income[0]?.total,
@@ -135,41 +114,40 @@ const Summary = () => {
   ];
 
   return (
-    <StyledSummary>
+    <Wrapper>
       <MainStats>
+        {/* ===== OVERVIEW ===== */}
         <Overview>
-          <Title>
-            <h2>Overview</h2>
-
-            <p>Click Users or Orders to view details.</p>
-          </Title>
+          <OverviewHeader>
+            <OverviewTitle>Overview</OverviewTitle>
+            <OverviewSub>Click Users or Orders to view details.</OverviewSub>
+          </OverviewHeader>
 
           <WidgetWrapper>
             {data.map((item, index) => (
-              <div
+              <WidgetCard
                 key={index}
                 onClick={item.onClick}
-                style={{
-                  cursor: "pointer",
-                }}
+                $clickable={!!item.onClick}
               >
                 <Widget data={item} />
-              </div>
+              </WidgetCard>
             ))}
           </WidgetWrapper>
         </Overview>
 
+        {/* ===== CHART ===== */}
         <ChartWrapper>
           <Chart />
         </ChartWrapper>
       </MainStats>
 
+      {/* ===== SIDE ===== */}
       <SideStats>
         <RecentTransaction />
-
         <AllTimeData />
       </SideStats>
-    </StyledSummary>
+    </Wrapper>
   );
 };
 
@@ -177,67 +155,80 @@ export default Summary;
 
 /* ================= STYLES ================= */
 
-const StyledSummary = styled.div`
+const Wrapper = styled.div`
   width: 100%;
   display: flex;
-
   gap: 2rem;
 `;
 
 const MainStats = styled.div`
   flex: 2;
-
   display: flex;
   flex-direction: column;
-
-  gap: 2rem;
+  gap: 1.5rem;
 `;
 
 const SideStats = styled.div`
   flex: 1;
-
   display: flex;
   flex-direction: column;
-
   height: fit-content;
+  gap: 1.5rem;
 `;
 
 const Overview = styled.div`
-  background: rgb(48, 51, 78);
-  color: rgba(234, 234, 255, 0.87);
-
-  width: 100%;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
   padding: 1.5rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+`;
 
-  border-radius: 10px;
+const OverviewHeader = styled.div`
+  margin-bottom: 1.25rem;
+`;
 
-  display: flex;
-  flex-direction: column;
+const OverviewTitle = styled.h2`
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 4px;
+`;
+
+const OverviewSub = styled.p`
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
 `;
 
 const WidgetWrapper = styled.div`
   display: flex;
-
   justify-content: space-between;
+  gap: 1.25rem;
+`;
 
-  gap: 2rem;
+const WidgetCard = styled.div`
+  flex: 1;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 1.25rem;
+  cursor: ${(p) => (p.$clickable ? "pointer" : "default")};
+  transition:
+    box-shadow 0.15s,
+    border-color 0.15s;
 
-  margin-top: 1rem;
+  &:hover {
+    box-shadow: ${(p) =>
+      p.$clickable ? "0 4px 12px rgba(0,0,0,0.08)" : "none"};
+    border-color: ${(p) => (p.$clickable ? "#bfdbfe" : "#e2e8f0")};
+  }
 `;
 
 const ChartWrapper = styled.div`
-  background: white;
-
-  padding: 1rem;
-
-  border-radius: 10px;
-
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-`;
-
-const Title = styled.div`
-  p {
-    font-size: 14px;
-    color: rgba(234, 234, 255, 0.68);
-  }
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 `;
