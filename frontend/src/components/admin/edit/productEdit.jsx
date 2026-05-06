@@ -16,6 +16,12 @@ const ProductEdit = ({ product }) => {
   const dispatch = useDispatch();
   const [open, setOpen] = React.useState(false);
   const [code, setCode] = React.useState(product.code);
+  const [isDiscount, setIsDiscount] = React.useState(
+    product.isDiscount || false,
+  );
+  const [discountPercent, setDiscountPercent] = React.useState(
+    product.discountPercent || 0,
+  );
   const [name, setName] = React.useState(product.name);
   const [category, setCategory] = React.useState(product.category);
   const [price, setPrice] = React.useState(product.price);
@@ -33,22 +39,6 @@ const ProductEdit = ({ product }) => {
     reader.onloadend = () => setProductImg(reader.result);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    dispatch(
-      updateProduct({
-        id: product._id,
-        code,
-        name,
-        category,
-        price,
-        desc,
-        image: productImg,
-      }),
-    );
-    handleClose();
-  };
-
   /* ── shared MUI TextField sx ── */
   const fieldSx = {
     "& .MuiOutlinedInput-root": {
@@ -62,6 +52,26 @@ const ProductEdit = ({ product }) => {
     },
     "& .MuiInputLabel-root.Mui-focused": { color: "#1D4ED8" },
     "& .MuiOutlinedInput-notchedOutline": { borderColor: "#E2E8F0" },
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    dispatch(
+      updateProduct({
+        id: product._id,
+        code,
+        name,
+        category,
+        price,
+        desc,
+        image: productImg,
+        isDiscount,
+        discountPercent,
+      }),
+    );
+
+    handleClose();
   };
 
   return (
@@ -174,6 +184,32 @@ const ProductEdit = ({ product }) => {
                 },
               }}
             />
+
+            {/* DISCOUNT ENABLE */}
+            <DiscountToggle>
+              <DiscountCheckbox
+                type="checkbox"
+                id="discount-toggle"
+                checked={isDiscount}
+                onChange={(e) => setIsDiscount(e.target.checked)}
+              />
+              <DiscountLabel htmlFor="discount-toggle">
+                Enable Discount
+              </DiscountLabel>
+            </DiscountToggle>
+
+            {/* DISCOUNT PERCENT */}
+            {isDiscount && (
+              <TextField
+                margin="dense"
+                label="Discount %"
+                type="number"
+                fullWidth
+                value={discountPercent}
+                onChange={(e) => setDiscountPercent(e.target.value)}
+                sx={fieldSx}
+              />
+            )}
 
             {/* DESC */}
             <TextField
@@ -306,4 +342,30 @@ const SubmitButton = styled.button`
   &:hover {
     opacity: 0.88;
   }
+`;
+
+const DiscountToggle = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 4px;
+  padding: 10px 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+`;
+
+const DiscountCheckbox = styled.input`
+  width: 16px;
+  height: 16px;
+  accent-color: #1d4ed8;
+  cursor: pointer;
+  flex-shrink: 0;
+`;
+
+const DiscountLabel = styled.label`
+  font-size: 14px;
+  font-weight: 500;
+  color: #1e293b;
+  cursor: pointer;
 `;

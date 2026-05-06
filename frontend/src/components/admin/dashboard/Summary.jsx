@@ -37,7 +37,7 @@ const Summary = () => {
   useEffect(() => {
     async function fetchData() {
       try {
-        const res = await axios.get(`${url}/users/stats`, setHeaders());
+        const res = await axios.get(`${url}/user-stats/stats`, setHeaders());
 
         const sorted = res.data.sort(compare);
 

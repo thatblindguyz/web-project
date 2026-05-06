@@ -37,6 +37,16 @@ const ProductSchema = new mongoose.Schema(
       required: true,
     },
 
+    isDiscount: {
+      type: Boolean,
+      default: false,
+    },
+
+    discountPercent: {
+      type: Number,
+      default: 0,
+    },
+
     quantity: {
       type: Number,
       required: true,

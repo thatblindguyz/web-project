@@ -29,32 +29,38 @@ router.post("/create-checkout-session", express.json(), async (req, res) => {
     });
 
     // Create line items
-    const line_items = req.body.items.map((item) => ({
-      price_data: {
-        currency: "usd",
+    const line_items = req.body.items.map((item) => {
+      const discountedPrice =
+        item.isDiscount && item.discountPercent > 0
+          ? item.price * (1 - item.discountPercent / 100)
+          : item.price;
 
-        product_data: {
-          name: item.name,
+      return {
+        price_data: {
+          currency: "usd",
 
-          // dùng BASE_URL cho image
-          images: [
-            item.image.startsWith("http")
-              ? item.image
-              : `${process.env.BASE_URL}/${item.image}`,
-          ],
+          product_data: {
+            name: item.name,
 
-          description: item.shortDesc || item.desc,
+            images: [
+              item.image.startsWith("http")
+                ? item.image
+                : `${process.env.BASE_URL}/${item.image}`,
+            ],
 
-          metadata: {
-            id: item.id,
+            description: item.shortDesc || item.desc,
+
+            metadata: {
+              id: item.id,
+            },
           },
+
+          unit_amount: Math.round(discountedPrice * 100),
         },
 
-        unit_amount: Math.round(item.price * 100),
-      },
-
-      quantity: item.cartQuantity,
-    }));
+        quantity: item.cartQuantity,
+      };
+    });
 
     // Create Stripe session
     const session = await stripe.checkout.sessions.create({

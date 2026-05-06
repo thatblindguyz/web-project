@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { clearCart, getTotals } from "../../features/cart/CartSlice";
+import { clearCart } from "../../features/cart/CartSlice";
 import { useNavigate } from "react-router-dom";
 
 const CheckoutSuccess = () => {

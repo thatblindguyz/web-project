@@ -67,18 +67,24 @@ const ProductDetail = () => {
               <Label>Description</Label>
               <Value>{product.desc}</Value>
             </Field>
-            <Field style={{ justifyContent: "space-between" }}>
-              {/* PRICE */}
-              <div style={{ display: "flex", gap: "8px" }}>
-                <Label>Price</Label>
+            <Field>
+              <Label>Price</Label>
+              {product.isDiscount && product.discountPercent > 0 ? (
+                <PriceBlock>
+                  <PriceValue discounted>
+                    $
+                    {Math.round(
+                      product.price * (1 - product.discountPercent / 100),
+                    ).toLocaleString()}
+                  </PriceValue>
+                  <OldPriceRow>
+                    <OldPrice>${product.price?.toLocaleString()}</OldPrice>
+                    <DiscountBadge>-{product.discountPercent}%</DiscountBadge>
+                  </OldPriceRow>
+                </PriceBlock>
+              ) : (
                 <PriceValue>${product.price?.toLocaleString()}</PriceValue>
-              </div>
-
-              {/* QUANTITY */}
-              <div style={{ display: "flex", gap: "8px" }}>
-                <Label>Stock</Label>
-                <Value>{product.quantity}</Value>
-              </div>
+              )}
             </Field>
           </FieldList>
         </InfoSection>
@@ -235,11 +241,40 @@ const Value = styled.span`
   font-weight: 500;
   color: #0f172a;
   font-family: ${(p) => (p.mono ? "monospace" : "inherit")};
-  text-align: right;
+  text-align: ${(p) => (p.mono ? "right" : "left")};
+  white-space: pre-line;
 `;
 
 const PriceValue = styled.span`
   font-size: 18px;
   font-weight: 700;
-  color: #0f172a;
+  color: ${(p) => (p.discounted ? "#1d4ed8" : "#0f172a")};
+`;
+
+const PriceBlock = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+`;
+
+const OldPriceRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+`;
+
+const OldPrice = styled.span`
+  font-size: 13px;
+  color: #94a3b8;
+  text-decoration: line-through;
+`;
+
+const DiscountBadge = styled.span`
+  font-size: 12px;
+  font-weight: 600;
+  color: #dc2626;
+  background: #fef2f2;
+  border-radius: 4px;
+  padding: 1px 6px;
 `;

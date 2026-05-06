@@ -10,6 +10,8 @@ import Home from "./components/homeUI/pages/Home";
 import Cart from "./components/homeUI/pages/Cart";
 import NotFound from "./components/homeUI/pages/NotFound";
 import ProductPage from "./components/homeUI/pages/ProductPage";
+import ForgotPassword from "./components/auth/password/ForgotPassword";
+import ResetPassword from "./components/auth/password/ResetPassword";
 
 /* AUTH */
 
@@ -63,6 +65,10 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/checkout-success" element={<CheckoutSuccess />} />
+
+          {/* Forgot + reset pass */}
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
 
           {/* ADMIN */}
 

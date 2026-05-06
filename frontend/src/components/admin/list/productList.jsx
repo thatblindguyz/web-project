@@ -81,11 +81,23 @@ const ProductList = () => {
     {
       field: "price",
       headerName: "Price",
-      width: 130,
-
-      renderCell: (params) => (
-        <PriceCell>${params.row.price?.toLocaleString()}</PriceCell>
-      ),
+      width: 160,
+      renderCell: (params) => {
+        const { price, isDiscount, discountPercent } = params.row;
+        if (isDiscount && discountPercent > 0) {
+          const discounted = price * (1 - discountPercent / 100);
+          return (
+            <PriceCol>
+              <NewPrice>${discounted.toLocaleString()}</NewPrice>
+              <OldPriceRow>
+                <OldPrice>${price?.toLocaleString()}</OldPrice>
+                <DiscountBadge>-{discountPercent}%</DiscountBadge>
+              </OldPriceRow>
+            </PriceCol>
+          );
+        }
+        return <PriceCell>${price?.toLocaleString()}</PriceCell>;
+      },
     },
 
     {
@@ -147,9 +159,17 @@ const ProductList = () => {
         getRowId={(row) => row._id}
         pageSizeOptions={[5, 10]}
         checkboxSelection
-        rowHeight={90}
+        getRowHeight={() => "auto"}
         sx={{
           border: 0,
+
+          "& .MuiDataGrid-cell": {
+            display: "flex",
+            alignItems: "center",
+            borderBottom: "1px solid #F1F5F9",
+            fontSize: "16px",
+            py: "8px",
+          },
 
           "& .MuiDataGrid-columnHeaders": {
             backgroundColor: "#F8FAFC",
@@ -171,9 +191,9 @@ const ProductList = () => {
             overflow: "visible !important",
           },
 
-          "& .MuiDataGrid-row:hover": {
-            backgroundColor: "#F8FAFC",
+          "& .MuiDataGrid-cell[data-field='price']": {
             overflow: "visible !important",
+            zIndex: 1,
           },
         }}
       />
@@ -267,4 +287,40 @@ const StockCell = styled.span`
       : p.$low
         ? "#d97706" // cam (ít hàng)
         : "#16a34a"}; // xanh (còn nhiều)
+`;
+
+const PriceCol = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  height: 100%;
+  width: 100%;
+`;
+
+const NewPrice = styled.span`
+  font-size: 15px;
+  font-weight: 700;
+  color: #1d4ed8;
+`;
+
+const OldPriceRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 5px;
+`;
+
+const OldPrice = styled.span`
+  font-size: 12px;
+  color: #94a3b8;
+  text-decoration: line-through;
+`;
+
+const DiscountBadge = styled.span`
+  font-size: 11px;
+  font-weight: 600;
+  color: #dc2626;
+  background: #fef2f2;
+  border-radius: 4px;
+  padding: 1px 5px;
 `;

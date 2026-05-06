@@ -100,15 +100,19 @@ const cartSlice = createSlice({
       toast.error("Cart cleared", { position: "bottom-left" });
     },
 
-    getTotals: (state, action) => {
+    getTotals: (state) => {
       let { total, quantity } = state.cartItems.reduce(
         (cartTotal, cartItem) => {
-          const { price, cartQuantity } = cartItem;
-          const itemTotal = price * cartQuantity;
+          const { price, discountPercent, isDiscount, cartQuantity } = cartItem;
 
+          const effectivePrice =
+            isDiscount && discountPercent > 0
+              ? price * (1 - discountPercent / 100)
+              : price;
+
+          const itemTotal = effectivePrice * cartQuantity;
           cartTotal.total += itemTotal;
           cartTotal.quantity += cartQuantity;
-
           return cartTotal;
         },
         {

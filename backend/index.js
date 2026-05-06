@@ -16,6 +16,8 @@ const loginRoute = require("./routes/LoginRoute");
 const userStats = require("./stats/UserStat");
 const orderStats = require("./stats/OrderStat");
 const incomeStats = require("./stats/IncomeStat");
+const forgotPasswordRoute = require("./routes/ForgotPasswordRoute");
+const userRoute = require("./routes/UserRoute");
 
 const app = express();
 
@@ -47,9 +49,11 @@ app.use(
 app.use("/api", registerRoute);
 app.use("/api", loginRoute);
 app.use("/api/products", productRoute);
-app.use("/api/users", userStats);
+app.use("/api/user-stats", userStats);
 app.use("/api/orders", orderStats);
 app.use("/api/income", incomeStats);
+app.use("/api", forgotPasswordRoute);
+app.use("/api/users", userRoute);
 
 /* ============================
    STATIC FILES

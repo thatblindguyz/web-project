@@ -38,6 +38,11 @@ const Cart = () => {
     dispatch(clearCart());
   };
 
+  const getPrice = (item) =>
+    item.isDiscount && item.discountPercent > 0
+      ? item.price * (1 - item.discountPercent / 100)
+      : item.price;
+
   return (
     <div className="cart-container">
       <h2 className="title">Your Cart</h2>
@@ -91,7 +96,21 @@ const Cart = () => {
                   </div>
                 </div>
 
-                <div className="cart-product-price">${cartItem.price}</div>
+                <div className="cart-product-price">
+                  ${getPrice(cartItem).toFixed(2)}
+                  {cartItem.isDiscount && cartItem.discountPercent > 0 && (
+                    <span
+                      style={{
+                        fontSize: "12px",
+                        color: "#94a3b8",
+                        textDecoration: "line-through",
+                        marginLeft: "6px",
+                      }}
+                    >
+                      ${cartItem.price}
+                    </span>
+                  )}
+                </div>
 
                 <div className="cart-product-quantity">
                   <button onClick={() => handleDecreaseCart(cartItem)}>
@@ -104,7 +123,7 @@ const Cart = () => {
                 </div>
 
                 <div className="cart-product-total-price">
-                  ${(cartItem.price * cartItem.cartQuantity).toFixed(2)}
+                  ${(getPrice(cartItem) * cartItem.cartQuantity).toFixed(2)}
                 </div>
               </div>
             ))}

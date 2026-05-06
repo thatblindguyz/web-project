@@ -10,41 +10,23 @@ const router = express.Router();
 ============================ */
 
 router.post("/", isAdmin, async (req, res) => {
-  const {
-    code,
-    name,
-    category,
-    shortDesc, // ⭐ THÊM DÒNG NÀY
-    desc,
-    price,
-    image,
-    quantity,
-  } = req.body;
+  const { code, name, category, shortDesc, desc, price, image, quantity } =
+    req.body;
 
   try {
     if (!image) {
       return res.status(400).send("Image is required");
     }
 
-    /* ============================
-       UPLOAD IMAGE
-    ============================ */
-
     const uploadResponse = await cloudinary.uploader.upload(image, {
       folder: "products",
     });
-
-    /* CHECK CODE DUPLICATE */
 
     const existingCode = await Product.findOne({ code });
 
     if (existingCode) {
       return res.status(400).send("Product code already exists");
     }
-
-    /* ============================
-       CREATE PRODUCT
-    ============================ */
 
     const product = new Product({
       code,
@@ -62,7 +44,6 @@ router.post("/", isAdmin, async (req, res) => {
     res.status(200).send(savedProduct);
   } catch (err) {
     console.log(err);
-
     res.status(500).send(err.message);
   }
 });
@@ -74,9 +55,27 @@ router.post("/", isAdmin, async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const products = await Product.find();
+    res.status(200).send(products);
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+});
+
+/* ============================
+   SEARCH PRODUCTS
+============================ */
+
+router.get("/search", async (req, res) => {
+  const query = req.query.q;
+
+  try {
+    const products = await Product.find({
+      name: { $regex: query, $options: "i" }, // không phân biệt hoa thường
+    });
 
     res.status(200).send(products);
   } catch (err) {
+    console.log(err);
     res.status(500).send(err.message);
   }
 });
@@ -88,7 +87,6 @@ router.get("/", async (req, res) => {
 router.get("/find/:id", async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
-
     res.status(200).send(product);
   } catch (err) {
     res.status(500).send(err.message);
@@ -102,7 +100,6 @@ router.get("/find/:id", async (req, res) => {
 router.delete("/:id", isAdmin, async (req, res) => {
   try {
     const deleted = await Product.findByIdAndDelete(req.params.id);
-
     res.status(200).send(deleted);
   } catch (err) {
     res.status(500).send(err.message);
@@ -114,8 +111,18 @@ router.delete("/:id", isAdmin, async (req, res) => {
 ============================ */
 
 router.put("/:id", isAdmin, async (req, res) => {
-  const { code, name, category, shortDesc, desc, price, image, quantity } =
-    req.body;
+  const {
+    code,
+    name,
+    category,
+    shortDesc,
+    desc,
+    price,
+    image,
+    quantity,
+    isDiscount,
+    discountPercent,
+  } = req.body;
 
   try {
     let updatedData = {
@@ -126,6 +133,8 @@ router.put("/:id", isAdmin, async (req, res) => {
       desc,
       price,
       quantity,
+      isDiscount,
+      discountPercent,
     };
 
     if (image && image.startsWith("data:image")) {
@@ -145,7 +154,6 @@ router.put("/:id", isAdmin, async (req, res) => {
     res.status(200).send(updatedProduct);
   } catch (err) {
     console.log(err);
-
     res.status(500).send(err.message);
   }
 });
