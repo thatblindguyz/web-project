@@ -23,19 +23,19 @@ const Cart = () => {
   }, [cartItems, dispatch]);
 
   const handleRemoveFromCart = (cartItem) => {
-    dispatch(removeFromCart(cartItem));
+    dispatch(removeFromCart({ ...cartItem, userId: auth._id }));
   };
 
   const handleDecreaseCart = (cartItem) => {
-    dispatch(decreaseCart(cartItem));
+    dispatch(decreaseCart({ ...cartItem, userId: auth._id }));
   };
 
   const handleIncreaseCart = (cartItem) => {
-    dispatch(addToCart(cartItem));
+    dispatch(addToCart({ ...cartItem, userId: auth._id }));
   };
 
   const handleClearCart = () => {
-    dispatch(clearCart());
+    dispatch(clearCart({ userId: auth._id }));
   };
 
   const getPrice = (item) =>
@@ -86,7 +86,7 @@ const Cart = () => {
             {cartItems?.map((cartItem) => (
               <div className="cart-item" key={cartItem._id}>
                 <div className="cart-product">
-                  <img src={cartItem.image} alt={cartItem.title} />
+                  <img src={cartItem.image} alt={cartItem.name} />
                   <div>
                     <h3>{cartItem.name}</h3>
                     <p>{cartItem.shortDesc || cartItem.desc}</p>
@@ -96,8 +96,9 @@ const Cart = () => {
                   </div>
                 </div>
 
+                {/* PRICE */}
                 <div className="cart-product-price">
-                  ${getPrice(cartItem).toFixed(2)}
+                  {getPrice(cartItem).toLocaleString("vi-VN")}₫
                   {cartItem.isDiscount && cartItem.discountPercent > 0 && (
                     <span
                       style={{
@@ -105,13 +106,15 @@ const Cart = () => {
                         color: "#94a3b8",
                         textDecoration: "line-through",
                         marginLeft: "6px",
+                        display: "block",
                       }}
                     >
-                      ${cartItem.price}
+                      {cartItem.price.toLocaleString("vi-VN")}₫
                     </span>
                   )}
                 </div>
 
+                {/* QUANTITY */}
                 <div className="cart-product-quantity">
                   <button onClick={() => handleDecreaseCart(cartItem)}>
                     -
@@ -122,8 +125,12 @@ const Cart = () => {
                   </button>
                 </div>
 
+                {/* TOTAL */}
                 <div className="cart-product-total-price">
-                  ${(getPrice(cartItem) * cartItem.cartQuantity).toFixed(2)}
+                  {(getPrice(cartItem) * cartItem.cartQuantity).toLocaleString(
+                    "vi-VN",
+                  )}
+                  ₫
                 </div>
               </div>
             ))}
@@ -157,10 +164,13 @@ const Cart = () => {
             <div className="cart-checkout">
               <div className="subtotal">
                 <span>Subtotal</span>
-                <span className="amount">${cartTotalAmount.toFixed(2)}</span>
+                <span className="amount">
+                  {cartTotalAmount.toLocaleString("vi-VN")}₫
+                </span>
               </div>
 
               <p>Taxes and shipping calculated at checkout</p>
+
               {auth._id ? (
                 <PayButton cartItems={cartItems} />
               ) : (

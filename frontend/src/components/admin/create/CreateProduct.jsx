@@ -55,8 +55,8 @@ const CreateProduct = () => {
         name,
         category,
         price,
-        shortDesc, // ⭐ ADD
-        desc, // full
+        shortDesc,
+        desc,
         quantity,
         image: productImg,
       }),
@@ -136,7 +136,7 @@ const CreateProduct = () => {
             </FieldGroup>
 
             <FieldGroup>
-              <FieldLabel>Price ($)</FieldLabel>
+              <FieldLabel>Price (₫)</FieldLabel>
               <StyledInput
                 type="number"
                 value={price}
@@ -159,7 +159,7 @@ const CreateProduct = () => {
               />
             </FieldGroup>
 
-            {/* ⭐ SHORT DESC */}
+            {/* SHORT DESC */}
             <FieldGroup>
               <FieldLabel>Short Description</FieldLabel>
               <StyledInput
@@ -171,7 +171,7 @@ const CreateProduct = () => {
               />
             </FieldGroup>
 
-            {/* ⭐ FULL DESC */}
+            {/* FULL DESC */}
             <FieldGroup>
               <FieldLabel>Full Description</FieldLabel>
               <StyledTextarea

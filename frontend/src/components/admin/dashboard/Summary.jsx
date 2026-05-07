@@ -26,22 +26,24 @@ const Summary = () => {
   const [income, setIncome] = useState([]);
   const [incomePerc, setIncomePerc] = useState(0);
 
-  function compare(a, b) {
-    if (a._id < b._id) return 1;
-    if (a._id > b._id) return -1;
-    return 0;
-  }
+  // function compare(a, b) {
+  //   if (a._id < b._id) return 1;
+  //   if (a._id > b._id) return -1;
+  //   return 0;
+  // }
 
   /* ================= USER STATS ================= */
   useEffect(() => {
     async function fetchData() {
       try {
         const res = await axios.get(`${url}/user-stats/stats`, setHeaders());
-        const sorted = res.data.sort(compare);
-        setUsers(sorted);
-        if (sorted.length >= 2) {
+        // const sorted = res.data.sort(compare);
+        setUsers(res.data);
+
+        if (res.data.length >= 2) {
           const percent =
-            ((sorted[0].total - sorted[1].total) / sorted[1].total) * 100;
+            ((res.data[0].total - res.data[1].total) / res.data[1].total) * 100;
+
           setUsersPerc(Math.floor(percent));
         }
       } catch (err) {
@@ -56,11 +58,13 @@ const Summary = () => {
     async function fetchData() {
       try {
         const res = await axios.get(`${url}/orders/stats`, setHeaders());
-        const sorted = res.data.sort(compare);
-        setOrders(sorted);
-        if (sorted.length >= 2) {
+        // const sorted = res.data.sort(compare);
+        setOrders(res.data);
+
+        if (res.data.length >= 2) {
           const percent =
-            ((sorted[0].total - sorted[1].total) / sorted[1].total) * 100;
+            ((res.data[0].total - res.data[1].total) / res.data[1].total) * 100;
+
           setOrdersPerc(Math.floor(percent));
         }
       } catch (err) {
@@ -75,11 +79,13 @@ const Summary = () => {
     async function fetchData() {
       try {
         const res = await axios.get(`${url}/income/stats`, setHeaders());
-        const sorted = res.data.sort(compare);
-        setIncome(sorted);
-        if (sorted.length >= 2) {
+        // const sorted = res.data.sort(compare);
+        setIncome(res.data);
+
+        if (res.data.length >= 2) {
           const percent =
-            ((sorted[0].total - sorted[1].total) / sorted[1].total) * 100;
+            ((res.data[0].total - res.data[1].total) / res.data[1].total) * 100;
+
           setIncomePerc(Math.floor(percent));
         }
       } catch (err) {
@@ -96,6 +102,7 @@ const Summary = () => {
       digit: users[0]?.total,
       title: "Users",
       percentage: usersPerc,
+      lastMonth: users[1]?.total,
       onClick: () => navigate("/admin/users"),
     },
     {
@@ -103,13 +110,16 @@ const Summary = () => {
       digit: orders[0]?.total,
       title: "Orders",
       percentage: ordersPerc,
+      lastMonth: orders[1]?.total,
       onClick: () => navigate("/admin/orders"),
     },
     {
       icon: <FaChartBar />,
       digit: income[0]?.total,
       title: "Earnings",
+      lastMonth: income[1]?.total,
       percentage: incomePerc,
+      isMoney: true,
     },
   ];
 
@@ -158,22 +168,25 @@ export default Summary;
 const Wrapper = styled.div`
   width: 100%;
   display: flex;
-  gap: 2rem;
+  gap: 1.5rem;
+  align-items: flex-start;
 `;
 
 const MainStats = styled.div`
-  flex: 2;
+  flex: 3;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 `;
 
 const SideStats = styled.div`
-  flex: 1;
+  flex: 1.2;
+  min-width: 260px;
+  max-width: 320px;
   display: flex;
   flex-direction: column;
-  height: fit-content;
-  gap: 1.5rem;
+  gap: 1rem;
 `;
 
 const Overview = styled.div`
@@ -202,9 +215,9 @@ const OverviewSub = styled.p`
 `;
 
 const WidgetWrapper = styled.div`
-  display: flex;
-  justify-content: space-between;
-  gap: 1.25rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
 `;
 
 const WidgetCard = styled.div`

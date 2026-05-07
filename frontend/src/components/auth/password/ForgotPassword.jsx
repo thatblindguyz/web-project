@@ -18,7 +18,9 @@ const ForgotPassword = () => {
     setLoading(true);
     setStatus(null);
     try {
-      await axios.post(`${url}/auth/forgot-password`, { email });
+      await axios.post(`${url}/forgot-password`, {
+        email,
+      });
       setStatus("success");
       setMessage("Reset link sent! Please check your email.");
     } catch (err) {

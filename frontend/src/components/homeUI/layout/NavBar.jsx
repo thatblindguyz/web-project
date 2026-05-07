@@ -2,13 +2,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import styled from "styled-components";
 import { logoutUser } from "../../../features/auth/AuthSlice";
+import { clearCart } from "../../../features/cart/CartSlice";
 import { toast } from "react-toastify";
 import { useState } from "react";
 
 const NavBar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { cartTotalQuantity } = useSelector((state) => state.cart);
+  const { cartTotalQuantity, cartItems } = useSelector((state) => state.cart);
   const auth = useSelector((state) => state.auth);
   const [search, setSearch] = useState("");
 
@@ -66,10 +67,17 @@ const NavBar = () => {
         <Links>
           {auth.isAdmin && <Link to="/admin/summary">Admin</Link>}
           {!auth.isAdmin && <Link to="/my-orders">My Orders</Link>}
+          <UserGreeting>Xin chào, {auth.name}</UserGreeting>
           <LogoutBtn
             onClick={() => {
+              localStorage.setItem(
+                `cartItems_${auth._id}`,
+                JSON.stringify(cartItems),
+              );
+              dispatch(clearCart());
               dispatch(logoutUser());
               toast.warning("Logged out!", { position: "bottom-left" });
+              navigate("/");
             }}
           >
             Logout
@@ -208,6 +216,12 @@ const LogoutBtn = styled.div`
   &:hover {
     opacity: 0.8;
   }
+`;
+
+const UserGreeting = styled.span`
+  font-size: 14px;
+  font-weight: 500;
+  color: #f8fafc;
 `;
 
 const AuthLinks = styled.div`

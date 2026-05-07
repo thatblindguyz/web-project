@@ -4,6 +4,7 @@ import { loginUser } from "../../features/auth/AuthSlice";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import styled, { keyframes } from "styled-components";
+import { loadCart, getTotals } from "../../features/cart/CartSlice";
 
 /* ============================
    COMPONENT
@@ -22,9 +23,13 @@ const Login = () => {
   /* Redirect after login */
   useEffect(() => {
     if (auth._id) {
+      const saved = localStorage.getItem(`cartItems_${auth._id}`);
+      console.log("Login → saved cart:", saved);
+      dispatch(loadCart(auth._id));
+      dispatch(getTotals());
       navigate("/");
     }
-  }, [auth._id, navigate]);
+  }, [auth._id, navigate, dispatch]);
 
   useEffect(() => {
     if (auth.loginStatus === "rejected") {

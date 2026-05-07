@@ -31,7 +31,7 @@ const Chart = () => {
 
           days.push({
             name: formatted,
-            label: `Date : ${formatted}`,
+            label: `Ngày : ${formatted}`,
             sales: 0,
             orders: 0,
           });
@@ -41,7 +41,7 @@ const Chart = () => {
           const dayIndex = days.findIndex((d) => d.name === String(item._id));
 
           if (dayIndex !== -1) {
-            days[dayIndex].sales = item.total ? item.total / 100 : 0;
+            days[dayIndex].sales = item.total || 0;
 
             days[dayIndex].orders = item.count ? item.count : 0;
           }
@@ -70,8 +70,8 @@ const Chart = () => {
 
           <Tooltip
             formatter={(value, name) => {
-              if (name === "Revenue ($)") {
-                return [`$${value.toLocaleString()}`, name];
+              if (name === "Revenue (₫)") {
+                return [`${value.toLocaleString("vi-VN")}₫`, name];
               }
               return [value, name];
             }}
@@ -81,14 +81,14 @@ const Chart = () => {
             type="monotone"
             dataKey="sales"
             stroke="#4b70e2"
-            name="Revenue ($)"
+            name="Doanh Thu (₫)"
           />
 
           <Line
             type="monotone"
             dataKey="orders"
             stroke="#82ca9d"
-            name="Orders"
+            name="Số đơn hàng"
           />
         </LineChart>
       </ResponsiveContainer>

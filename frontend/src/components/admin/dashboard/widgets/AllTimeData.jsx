@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 import axios from "axios";
-
 import { url, setHeaders } from "../../../../features/api";
 
 const AllTimeData = () => {
@@ -9,81 +8,53 @@ const AllTimeData = () => {
   const [products, setProducts] = useState(0);
   const [orders, setOrders] = useState(0);
   const [earnings, setEarnings] = useState(0);
-
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        /* ================= USERS ================= */
-
         const usersRes = await axios.get(`${url}/users`, setHeaders());
-
-        console.log("Users:", usersRes.data);
-
         setUsers(usersRes.data.length || 0);
 
-        /* ================= PRODUCTS ================= */
-
         const productsRes = await axios.get(`${url}/products`, setHeaders());
-
-        console.log("Products:", productsRes.data);
-
         setProducts(productsRes.data.length || 0);
 
-        /* ================= ORDERS ================= */
-
         const ordersRes = await axios.get(`${url}/orders`, setHeaders());
-
-        console.log("Orders:", ordersRes.data);
-
         setOrders(ordersRes.data.length || 0);
 
-        /* ================= EARNINGS ================= */
-
         const incomeRes = await axios.get(`${url}/income/all`, setHeaders());
-
-        console.log("Income ALL:", incomeRes.data);
-
         setEarnings(incomeRes.data.length > 0 ? incomeRes.data[0].total : 0);
       } catch (err) {
         console.log("AllTimeData ERROR:", err);
       }
-
       setLoading(false);
     }
-
     fetchData();
   }, []);
 
+  const rows = [
+    { label: "Users", value: users },
+    { label: "Products", value: products },
+    { label: "Orders", value: orders },
+    {
+      label: "Earnings",
+      value: `${earnings.toLocaleString("vi-VN")}₫`,
+    },
+  ];
+
   return (
     <Main>
-      <h3>All Time</h3>
+      <SectionTitle>All Time</SectionTitle>
 
       {loading ? (
-        <p>Loading...</p>
+        <LoadingText>Loading...</LoadingText>
       ) : (
-        <>
-          <Info>
-            <Title>Users</Title>
-            <Data>{users}</Data>
+        rows.map((row) => (
+          <Info key={row.label}>
+            <Label>{row.label}</Label>
+            <Value>{row.value}</Value>
           </Info>
-
-          <Info>
-            <Title>Products</Title>
-            <Data>{products}</Data>
-          </Info>
-
-          <Info>
-            <Title>Orders</Title>
-            <Data>{orders}</Data>
-          </Info>
-
-          <Info>
-            <Title>Earnings</Title>
-            <Data>${earnings.toLocaleString()}</Data>
-          </Info>
-        </>
+        ))
       )}
     </Main>
   );
@@ -94,49 +65,52 @@ export default AllTimeData;
 /* ================= STYLES ================= */
 
 const Main = styled.div`
-  background: rgb(48, 51, 78);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
 
-  color: rgba(234, 234, 255, 0.87);
-
-  margin-top: 1.5rem;
-
-  border-radius: 8px;
-
-  padding: 1rem;
-
-  font-size: 14px;
+const SectionTitle = styled.h3`
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 0.5rem;
 `;
 
 const Info = styled.div`
   display: flex;
-
-  margin-top: 1rem;
-
-  padding: 0.6rem;
-
-  border-radius: 6px;
-
-  background: rgba(38, 198, 249, 0.12);
-
-  transition: 0.2s;
-
-  &:nth-child(even) {
-    background: rgba(102, 108, 255, 0.12);
-  }
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  transition: border-color 0.15s;
 
   &:hover {
-    transform: scale(1.02);
+    border-color: #bfdbfe;
   }
 `;
 
-const Title = styled.div`
-  flex: 1;
+const Label = styled.span`
+  font-size: 13px;
+  font-weight: 500;
+  color: #475569;
 `;
 
-const Data = styled.div`
-  flex: 1;
-
+const Value = styled.span`
+  font-size: 14px;
   font-weight: 700;
+  color: #0f172a;
+`;
 
-  text-align: right;
+const LoadingText = styled.p`
+  font-size: 13px;
+  color: #94a3b8;
+  margin: 0;
 `;

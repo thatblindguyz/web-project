@@ -86,7 +86,7 @@ const OrderList = () => {
       headerName: "Amount",
       width: 140,
       renderCell: (params) => (
-        <Amount>${(params.row.total / 100).toLocaleString()}</Amount>
+        <Amount>{params.row.total?.toLocaleString("vi-VN")}₫</Amount>
       ),
     },
 

@@ -45,21 +45,83 @@ router.post("/forgot-password", async (req, res) => {
 
     // SEND EMAIL
     await transporter.sendMail({
-      from: process.env.EMAIL_USER,
+      from: `"TECHCOM Support" <${process.env.EMAIL_USER}>`,
 
       to: user.email,
 
-      subject: "Reset Password",
+      subject: "TECHCOM - Yêu cầu đặt lại mật khẩu",
 
       html: `
-        <h2>Password Reset</h2>
+  <div style="
+    font-family: Arial, sans-serif;
+    max-width: 600px;
+    margin: auto;
+    padding: 24px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #ffffff;
+  ">
+    <h2 style="
+      color: #1d4ed8;
+      margin-bottom: 20px;
+    ">
+      Đặt lại mật khẩu TECHCOM
+    </h2>
 
-        <p>Click below to reset password:</p>
+    <p>Xin chào <b>${user.name}</b>,</p>
 
-        <a href="${resetLink}">
-          ${resetLink}
-        </a>
-      `,
+    <p>
+      Chúng tôi đã nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn.
+    </p>
+
+    <p>
+      Nhấn vào nút bên dưới để tạo mật khẩu mới:
+    </p>
+
+    <a
+      href="${resetLink}"
+      style="
+        display: inline-block;
+        margin-top: 12px;
+        padding: 12px 22px;
+        background: #1d4ed8;
+        color: #ffffff;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: bold;
+      "
+    >
+      Đặt lại mật khẩu
+    </a>
+
+    <p style="
+      margin-top: 24px;
+      color: #475569;
+    ">
+      Liên kết này sẽ hết hạn sau 15 phút.
+    </p>
+
+    <p style="
+      color: #475569;
+    ">
+      Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.
+    </p>
+
+    <hr style="
+      margin: 24px 0;
+      border: none;
+      border-top: 1px solid #e2e8f0;
+    " />
+
+    <p style="
+      font-size: 12px;
+      color: #94a3b8;
+      text-align: center;
+    ">
+      © 2026 TECHCOM. All rights reserved.
+    </p>
+  </div>
+`,
     });
 
     res.send("Reset email sent");

@@ -33,7 +33,7 @@ const ResetPassword = () => {
     setLoading(true);
     setStatus(null);
     try {
-      await axios.post(`${url}/auth/reset-password/${token}`, { password });
+      await axios.post(`${url}/reset-password/${token}`, { password });
       setStatus("success");
       setMessage("Password reset successfully! Redirecting to login...");
       setTimeout(() => navigate("/login"), 2500);

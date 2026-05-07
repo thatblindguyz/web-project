@@ -1,5 +1,5 @@
 import { useGetProductsQuery } from "../../../features/product/ProductAPI";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addToCart, getTotals } from "../../../features/cart/CartSlice";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import styled from "styled-components";
@@ -8,6 +8,7 @@ const Home = () => {
   const { data, error, isLoading } = useGetProductsQuery();
   const [searchParams] = useSearchParams();
   const search = searchParams.get("search") || "";
+  const auth = useSelector((state) => state.auth);
 
   const filteredProducts = data?.filter((product) =>
     product.name.toLowerCase().includes(search.toLowerCase()),
@@ -17,7 +18,7 @@ const Home = () => {
   const navigate = useNavigate();
 
   const handleAddToCart = (product) => {
-    dispatch(addToCart(product));
+    dispatch(addToCart({ ...product, userId: auth._id }));
     dispatch(getTotals());
   };
 
@@ -48,17 +49,20 @@ const Home = () => {
                         {(
                           product.price *
                           (1 - product.discountPercent / 100)
-                        ).toLocaleString()}
+                        ).toLocaleString("vi-VN")}
+                        ₫
                       </NewPrice>
                       <OldPriceRow>
-                        <OldPrice>${product.price?.toLocaleString()}</OldPrice>
+                        <OldPrice>
+                          {product.price?.toLocaleString("vi-VN")}₫
+                        </OldPrice>
                         <DiscountBadge>
                           -{product.discountPercent}%
                         </DiscountBadge>
                       </OldPriceRow>
                     </>
                   ) : (
-                    <Price>${product.price?.toLocaleString()}</Price>
+                    <Price>{product.price?.toLocaleString("vi-VN")}₫</Price>
                   )}
                 </PriceBlock>
                 <Stock
@@ -184,6 +188,7 @@ const AddButton = styled.button`
 
 const PriceBlock = styled.div`
   margin: 0 0 4px;
+  min-height: 44px;
 `;
 
 const NewPrice = styled.p`

@@ -15,23 +15,41 @@ const OrderSchema = new mongoose.Schema(
     products: [
       {
         id: { type: String },
+
         name: { type: String },
+
         category: { type: String },
+
         desc: { type: String },
+
         price: { type: Number },
+
         image: { type: String },
+
         cartQuantity: { type: Number },
+
+        isDiscount: {
+          type: Boolean,
+          default: false,
+        },
+
+        discountPercent: {
+          type: Number,
+          default: 0,
+        },
       },
     ],
 
     subtotal: {
       type: Number,
       required: true,
+      min: 0,
     },
 
     total: {
       type: Number,
       required: true,
+      min: 0,
     },
 
     shipping: {
@@ -41,11 +59,13 @@ const OrderSchema = new mongoose.Schema(
 
     delivery_status: {
       type: String,
+      enum: ["pending", "delivering", "delivered", "cancelled"],
       default: "pending",
     },
 
     payment_status: {
       type: String,
+      enum: ["pending", "paid"],
       required: true,
     },
   },

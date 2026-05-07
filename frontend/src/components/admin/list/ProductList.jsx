@@ -88,15 +88,15 @@ const ProductList = () => {
           const discounted = price * (1 - discountPercent / 100);
           return (
             <PriceCol>
-              <NewPrice>${discounted.toLocaleString()}</NewPrice>
+              <NewPrice>{discounted.toLocaleString("vi-VN")}₫</NewPrice>
               <OldPriceRow>
-                <OldPrice>${price?.toLocaleString()}</OldPrice>
+                <OldPrice>{price?.toLocaleString("vi-VN")}₫</OldPrice>
                 <DiscountBadge>-{discountPercent}%</DiscountBadge>
               </OldPriceRow>
             </PriceCol>
           );
         }
-        return <PriceCell>${price?.toLocaleString()}</PriceCell>;
+        return <PriceCell>{price?.toLocaleString("vi-VN")}₫</PriceCell>;
       },
     },
 

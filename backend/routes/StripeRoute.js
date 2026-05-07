@@ -37,7 +37,7 @@ router.post("/create-checkout-session", express.json(), async (req, res) => {
 
       return {
         price_data: {
-          currency: "usd",
+          currency: "vnd",
 
           product_data: {
             name: item.name,
@@ -55,7 +55,7 @@ router.post("/create-checkout-session", express.json(), async (req, res) => {
             },
           },
 
-          unit_amount: Math.round(discountedPrice * 100),
+          unit_amount: Math.round(discountedPrice),
         },
 
         quantity: item.cartQuantity,
@@ -65,6 +65,7 @@ router.post("/create-checkout-session", express.json(), async (req, res) => {
     // Create Stripe session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
+      locale: "vi",
 
       shipping_address_collection: {
         allowed_countries: ["VN"],
@@ -77,15 +78,15 @@ router.post("/create-checkout-session", express.json(), async (req, res) => {
 
             fixed_amount: {
               amount: 0,
-              currency: "usd",
+              currency: "vnd",
             },
 
-            display_name: "Free shipping",
+            display_name: "Giao hàng miễn phí",
 
             delivery_estimate: {
               minimum: {
                 unit: "business_day",
-                value: 5,
+                value: 3,
               },
               maximum: {
                 unit: "business_day",
@@ -100,11 +101,11 @@ router.post("/create-checkout-session", express.json(), async (req, res) => {
             type: "fixed_amount",
 
             fixed_amount: {
-              amount: 1500,
-              currency: "usd",
+              amount: 30000,
+              currency: "vnd",
             },
 
-            display_name: "Next day air",
+            display_name: "Giao hỏa tốc",
 
             delivery_estimate: {
               minimum: {

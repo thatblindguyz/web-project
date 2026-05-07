@@ -36,7 +36,21 @@ const ProductPage = () => {
         <InfoSection>
           <ProductName>{product.name}</ProductName>
 
-          <PriceValue>${product.price?.toLocaleString()}</PriceValue>
+          {product.isDiscount && product.discountPercent > 0 ? (
+            <>
+              <PriceValue>
+                {(
+                  product.price *
+                  (1 - product.discountPercent / 100)
+                ).toLocaleString("vi-VN")}
+                ₫
+              </PriceValue>
+
+              <OldPrice>{product.price?.toLocaleString("vi-VN")}₫</OldPrice>
+            </>
+          ) : (
+            <PriceValue>{product.price?.toLocaleString("vi-VN")}₫</PriceValue>
+          )}
 
           <SectionTitle>Description</SectionTitle>
 
@@ -151,4 +165,10 @@ const Desc = styled.p`
 const Value = styled.span`
   font-size: 14px;
   color: #475569;
+`;
+
+const OldPrice = styled.span`
+  font-size: 14px;
+  color: #94a3b8;
+  text-decoration: line-through;
 `;

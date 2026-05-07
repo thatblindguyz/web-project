@@ -25,6 +25,7 @@ const ProductEdit = ({ product }) => {
   const [name, setName] = React.useState(product.name);
   const [category, setCategory] = React.useState(product.category);
   const [price, setPrice] = React.useState(product.price);
+  const [quantity, setQuantity] = React.useState(product.quantity);
   const [desc, setDesc] = React.useState(product.desc);
   const [productImg, setProductImg] = React.useState(product.image);
 
@@ -64,6 +65,7 @@ const ProductEdit = ({ product }) => {
         name,
         category,
         price,
+        quantity,
         desc,
         image: productImg,
         isDiscount,
@@ -164,7 +166,7 @@ const ProductEdit = ({ product }) => {
             {/* PRICE */}
             <TextField
               margin="dense"
-              label="Price"
+              label="Price (₫)"
               type="number"
               fullWidth
               value={price}
@@ -174,6 +176,31 @@ const ProductEdit = ({ product }) => {
               sx={{
                 ...fieldSx,
                 "& input[type=number]": { MozAppearance: "textfield" },
+                "& input[type=number]::-webkit-outer-spin-button": {
+                  WebkitAppearance: "none",
+                  margin: 0,
+                },
+                "& input[type=number]::-webkit-inner-spin-button": {
+                  WebkitAppearance: "none",
+                  margin: 0,
+                },
+              }}
+            />
+
+            {/* QUANTITY */}
+            <TextField
+              margin="dense"
+              label="Quantity"
+              type="number"
+              fullWidth
+              value={quantity}
+              onChange={(e) => setQuantity(e.target.value)}
+              required
+              sx={{
+                ...fieldSx,
+                "& input[type=number]": {
+                  MozAppearance: "textfield",
+                },
                 "& input[type=number]::-webkit-outer-spin-button": {
                   WebkitAppearance: "none",
                   margin: 0,

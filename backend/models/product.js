@@ -30,6 +30,7 @@ const ProductSchema = new mongoose.Schema(
     price: {
       type: Number,
       required: true,
+      min: 0,
     },
 
     image: {
@@ -45,12 +46,15 @@ const ProductSchema = new mongoose.Schema(
     discountPercent: {
       type: Number,
       default: 0,
+      min: 0,
+      max: 100,
     },
 
     quantity: {
       type: Number,
       required: true,
       default: 0,
+      min: 0,
     },
   },
   { timestamps: true },

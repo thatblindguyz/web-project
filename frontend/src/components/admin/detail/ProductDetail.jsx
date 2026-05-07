@@ -72,18 +72,22 @@ const ProductDetail = () => {
               {product.isDiscount && product.discountPercent > 0 ? (
                 <PriceBlock>
                   <PriceValue discounted>
-                    $
                     {Math.round(
                       product.price * (1 - product.discountPercent / 100),
-                    ).toLocaleString()}
+                    ).toLocaleString("vi-VN")}
+                    ₫
                   </PriceValue>
                   <OldPriceRow>
-                    <OldPrice>${product.price?.toLocaleString()}</OldPrice>
+                    <OldPrice>
+                      {product.price?.toLocaleString("vi-VN")}₫
+                    </OldPrice>
                     <DiscountBadge>-{product.discountPercent}%</DiscountBadge>
                   </OldPriceRow>
                 </PriceBlock>
               ) : (
-                <PriceValue>${product.price?.toLocaleString()}</PriceValue>
+                <PriceValue>
+                  {product.price?.toLocaleString("vi-VN")}₫
+                </PriceValue>
               )}
             </Field>
           </FieldList>

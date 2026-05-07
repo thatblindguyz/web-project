@@ -47,7 +47,7 @@ router.get("/stats", auth, isAdmin, async (req, res) => {
 
 //  INCOME STATS (LAST 7 DAYS)
 
-router.get("/weeksales", auth, isAdmin, async (req, res) => {
+router.get("/week-sales", auth, isAdmin, async (req, res) => {
   try {
     const today = new Date();
 

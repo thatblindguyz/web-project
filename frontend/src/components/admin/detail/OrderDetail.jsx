@@ -106,7 +106,7 @@ const OrderDetail = () => {
             </Field>
             <Field>
               <Label>Total Amount</Label>
-              <Value strong>${(order.total / 100).toLocaleString()}</Value>
+              <Value strong>{order.total?.toLocaleString("vi-VN")}₫</Value>
             </Field>
             <Field>
               <Label>Payment</Label>
@@ -196,7 +196,15 @@ const OrderDetail = () => {
               <ProductId mono>#{item.id?.slice(-8)?.toUpperCase()}</ProductId>
               <ProductQty>×{item.cartQuantity}</ProductQty>
               <ProductPrice>
-                {item.price ? `$${item.price.toLocaleString()}` : "N/A"}
+                {item.price
+                  ? `${
+                      item.isDiscount && item.discountPercent > 0
+                        ? Math.round(
+                            item.price * (1 - item.discountPercent / 100),
+                          ).toLocaleString("vi-VN")
+                        : item.price.toLocaleString("vi-VN")
+                    }₫`
+                  : "N/A"}
               </ProductPrice>
             </ProductRow>
           ))}

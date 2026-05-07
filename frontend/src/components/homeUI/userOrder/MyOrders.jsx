@@ -107,7 +107,7 @@ const MyOrders = () => {
                 <InfoGrid>
                   <InfoItem>
                     <Label>Total</Label>
-                    <Value>${(order.total / 100).toLocaleString()}</Value>
+                    <Value>{order.total?.toLocaleString("vi-VN")}₫</Value>
                   </InfoItem>
 
                   <InfoItem>
@@ -172,7 +172,13 @@ const MyOrders = () => {
                         <ProductName>{item.name}</ProductName>
                         <ProductMeta>Qty: {item.cartQuantity}</ProductMeta>
                         <ProductMeta>
-                          ${item.price?.toLocaleString()}
+                          {item.isDiscount && item.discountPercent > 0
+                            ? (
+                                item.price *
+                                (1 - item.discountPercent / 100)
+                              ).toLocaleString("vi-VN")
+                            : item.price?.toLocaleString("vi-VN")}
+                          ₫
                         </ProductMeta>
                       </ProductInfo>
                     </ProductItem>

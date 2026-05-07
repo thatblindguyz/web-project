@@ -40,7 +40,7 @@ const UserOrderDetail = () => {
       <h2>Order #{order._id.slice(-8)}</h2>
 
       <p>
-        <b>Total:</b> ${(order.total / 100).toLocaleString()}
+        <b>Total:</b> {order.total?.toLocaleString("vi-VN")}₫
       </p>
 
       <p>
@@ -127,7 +127,16 @@ const UserOrderDetail = () => {
 
             <p>Qty: {item.cartQuantity}</p>
 
-            <p>Price: ${item.price?.toLocaleString()}</p>
+            <p>
+              Price:{" "}
+              {item.isDiscount && item.discountPercent > 0
+                ? (
+                    item.price *
+                    (1 - item.discountPercent / 100)
+                  ).toLocaleString("vi-VN")
+                : item.price?.toLocaleString("vi-VN")}
+              ₫
+            </p>
           </div>
         </div>
       ))}
