@@ -3,7 +3,9 @@ const { auth, isAdmin } = require("../middleware/auth");
 
 const router = require("express").Router();
 
-//  INCOME STATS (MONTHLY)
+/* ============================
+   INCOME STATS (MONTHLY)
+============================ */
 
 router.get("/stats", auth, isAdmin, async (req, res) => {
   try {
@@ -11,13 +13,19 @@ router.get("/stats", auth, isAdmin, async (req, res) => {
       {
         $match: {
           createdAt: { $exists: true },
+
           payment_status: "paid",
+
+          delivery_status: {
+            $ne: "cancelled",
+          },
         },
       },
 
       {
         $project: {
           month: { $month: "$createdAt" },
+
           sales: "$total",
         },
       },
@@ -25,6 +33,7 @@ router.get("/stats", auth, isAdmin, async (req, res) => {
       {
         $group: {
           _id: "$month",
+
           total: { $sum: "$sales" },
         },
       },
@@ -41,30 +50,40 @@ router.get("/stats", auth, isAdmin, async (req, res) => {
     res.status(200).send(income);
   } catch (err) {
     console.error("Income stats error:", err);
+
     res.status(500).send(err.message);
   }
 });
 
-//  INCOME STATS (LAST 7 DAYS)
+/* ============================
+   INCOME STATS (LAST 7 DAYS)
+============================ */
 
 router.get("/week-sales", auth, isAdmin, async (req, res) => {
   try {
     const today = new Date();
 
     const last7Days = new Date();
+
     last7Days.setDate(today.getDate() - 7);
 
     const income = await Order.aggregate([
       {
         $match: {
           createdAt: { $gte: last7Days },
+
           payment_status: "paid",
+
+          delivery_status: {
+            $ne: "cancelled",
+          },
         },
       },
 
       {
         $project: {
-          day: { $isoDayOfWeek: "$createdAt" }, // Mon=1
+          day: { $isoDayOfWeek: "$createdAt" },
+
           sales: "$total",
         },
       },
@@ -72,6 +91,7 @@ router.get("/week-sales", auth, isAdmin, async (req, res) => {
       {
         $group: {
           _id: "$day",
+
           total: { $sum: "$sales" },
         },
       },
@@ -84,11 +104,14 @@ router.get("/week-sales", auth, isAdmin, async (req, res) => {
     res.status(200).send(income);
   } catch (err) {
     console.error("Weekly income error:", err);
+
     res.status(500).send(err.message);
   }
 });
 
-// TOTAL INCOME (ALL TIME)
+/* ============================
+   TOTAL INCOME (ALL TIME)
+============================ */
 
 router.get("/all", auth, isAdmin, async (req, res) => {
   try {
@@ -96,11 +119,17 @@ router.get("/all", auth, isAdmin, async (req, res) => {
       {
         $match: {
           payment_status: "paid",
+
+          delivery_status: {
+            $ne: "cancelled",
+          },
         },
       },
+
       {
         $group: {
           _id: null,
+
           total: { $sum: "$total" },
         },
       },
@@ -109,6 +138,7 @@ router.get("/all", auth, isAdmin, async (req, res) => {
     res.status(200).send(income);
   } catch (err) {
     console.error(err);
+
     res.status(500).send(err.message);
   }
 });

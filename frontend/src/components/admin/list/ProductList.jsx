@@ -158,7 +158,6 @@ const ProductList = () => {
         columns={columns}
         getRowId={(row) => row._id}
         pageSizeOptions={[5, 10]}
-        checkboxSelection
         getRowHeight={() => "auto"}
         sx={{
           border: 0,

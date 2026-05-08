@@ -3,7 +3,9 @@ const { auth, isAdmin } = require("../middleware/auth");
 
 const router = require("express").Router();
 
-//  ORDER STATS (MONTHLY)
+/* ============================
+   ORDER STATS (MONTHLY)
+============================ */
 
 router.get("/stats", auth, isAdmin, async (req, res) => {
   try {
@@ -11,6 +13,10 @@ router.get("/stats", auth, isAdmin, async (req, res) => {
       {
         $match: {
           createdAt: { $exists: true },
+
+          delivery_status: {
+            $ne: "cancelled",
+          },
         },
       },
 
@@ -23,6 +29,7 @@ router.get("/stats", auth, isAdmin, async (req, res) => {
       {
         $group: {
           _id: "$month",
+
           total: { $sum: 1 },
         },
       },
@@ -35,33 +42,44 @@ router.get("/stats", auth, isAdmin, async (req, res) => {
         $limit: 2,
       },
     ]);
+
     res.status(200).send(orders);
   } catch (err) {
     console.error("Order stats error:", err);
+
     res.status(500).send(err.message);
   }
 });
 
-// ORDER STATS (last 7 days with date)
+/* ============================
+   ORDER STATS (LAST 7 DAYS)
+============================ */
 
 router.get("/week-sales", auth, isAdmin, async (req, res) => {
   try {
     const today = new Date();
 
     const last7Days = new Date();
+
     last7Days.setDate(today.getDate() - 6);
 
     const income = await Order.aggregate([
       {
         $match: {
           createdAt: { $gte: last7Days },
+
           payment_status: "paid",
+
+          delivery_status: {
+            $ne: "cancelled",
+          },
         },
       },
 
       {
         $project: {
           day: { $dayOfMonth: "$createdAt" },
+
           month: { $month: "$createdAt" },
 
           total: "$total",
@@ -72,10 +90,12 @@ router.get("/week-sales", auth, isAdmin, async (req, res) => {
         $group: {
           _id: {
             day: "$day",
+
             month: "$month",
           },
 
           total: { $sum: "$total" },
+
           count: { $sum: 1 },
         },
       },
@@ -83,18 +103,23 @@ router.get("/week-sales", auth, isAdmin, async (req, res) => {
 
     const formatted = income.map((item) => ({
       _id: `${item._id.day}/${item._id.month}`,
+
       total: item.total,
+
       count: item.count,
     }));
 
     res.status(200).send(formatted);
   } catch (err) {
     console.log(err);
+
     res.status(500).send(err.message);
   }
 });
 
-// get recent orders
+/* ============================
+   GET RECENT ORDERS
+============================ */
 
 router.get("/", auth, isAdmin, async (req, res) => {
   const query = req.query.new;
@@ -115,7 +140,9 @@ router.get("/", auth, isAdmin, async (req, res) => {
   }
 });
 
-//  get 1 order
+/* ============================
+   GET 1 ORDER
+============================ */
 
 router.get("/find/:id", auth, isAdmin, async (req, res) => {
   try {
@@ -127,7 +154,9 @@ router.get("/find/:id", auth, isAdmin, async (req, res) => {
   }
 });
 
-// GET USER ORDERS
+/* ============================
+   GET USER ORDERS
+============================ */
 
 router.get("/my-orders", auth, async (req, res) => {
   try {
@@ -138,16 +167,20 @@ router.get("/my-orders", auth, async (req, res) => {
     res.status(200).send(orders);
   } catch (err) {
     console.log(err);
+
     res.status(500).send(err.message);
   }
 });
 
-// GET USER ORDER DETAIL
+/* ============================
+   GET USER ORDER DETAIL
+============================ */
 
 router.get("/my-orders/:id", auth, async (req, res) => {
   try {
     const order = await Order.findOne({
       _id: req.params.id,
+
       userId: req.user._id,
     });
 
@@ -158,11 +191,14 @@ router.get("/my-orders/:id", auth, async (req, res) => {
     res.status(200).send(order);
   } catch (err) {
     console.log(err);
+
     res.status(500).send(err.message);
   }
 });
 
-// CANCEL ORDER (USER)
+/* ============================
+   CANCEL ORDER (USER)
+============================ */
 
 router.put("/cancel/:id", auth, async (req, res) => {
   try {
@@ -183,11 +219,14 @@ router.put("/cancel/:id", auth, async (req, res) => {
     res.status(200).send(order);
   } catch (err) {
     console.log(err);
+
     res.status(500).send(err.message);
   }
 });
 
-// UPDATE DELIVERY STATUS (ADMIN)
+/* ============================
+   UPDATE DELIVERY STATUS (ADMIN)
+============================ */
 
 router.put("/delivery/:id", auth, isAdmin, async (req, res) => {
   try {
@@ -199,10 +238,6 @@ router.put("/delivery/:id", auth, isAdmin, async (req, res) => {
 
     const newStatus = req.body.status;
 
-    /* ============================
-       BLOCK INVALID CASES
-    ============================ */
-
     if (order.delivery_status === "cancelled") {
       return res.status(400).send("Cannot update cancelled order");
     }
@@ -211,12 +246,9 @@ router.put("/delivery/:id", auth, isAdmin, async (req, res) => {
       return res.status(400).send("Order already completed");
     }
 
-    /* ============================
-       VALID FLOW ONLY
-    ============================ */
-
     const validTransitions = {
       pending: ["delivering", "cancelled"],
+
       delivering: ["delivered"],
     };
 
@@ -226,10 +258,6 @@ router.put("/delivery/:id", auth, isAdmin, async (req, res) => {
       return res.status(400).send("Invalid status transition");
     }
 
-    /* ============================
-       UPDATE
-    ============================ */
-
     order.delivery_status = newStatus;
 
     await order.save();
@@ -237,6 +265,31 @@ router.put("/delivery/:id", auth, isAdmin, async (req, res) => {
     res.status(200).send(order);
   } catch (err) {
     console.log(err);
+
+    res.status(500).send(err.message);
+  }
+});
+
+/* ============================
+   UPDATE PAYMENT STATUS
+============================ */
+
+router.put("/:id/pay", auth, isAdmin, async (req, res) => {
+  try {
+    const order = await Order.findByIdAndUpdate(
+      req.params.id,
+      {
+        payment_status: "paid",
+      },
+      {
+        returnDocument: "after",
+      },
+    );
+
+    res.status(200).send(order);
+  } catch (err) {
+    console.log(err);
+
     res.status(500).send(err.message);
   }
 });

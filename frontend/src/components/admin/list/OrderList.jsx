@@ -48,6 +48,7 @@ const OrderList = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { items: orders } = useSelector((state) => state.orders);
+
   const updateStatus = async (id, status) => {
     const confirmAction = window.confirm(
       `Are you sure to set this order to ${status}?`,
@@ -58,7 +59,22 @@ const OrderList = () => {
     try {
       await axios.put(`${url}/orders/delivery/${id}`, { status }, setHeaders());
 
-      // reload lại data
+      // reload data
+      dispatch(fetchOrders());
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  //update payment status
+  const updatePaymentStatus = async (id) => {
+    const confirmAction = window.confirm("Xác nhận đơn hàng đã thanh toán?");
+
+    if (!confirmAction) return;
+
+    try {
+      await axios.put(`${url}/orders/${id}/pay`, {}, setHeaders());
+
       dispatch(fetchOrders());
     } catch (err) {
       console.log(err);
@@ -74,7 +90,7 @@ const OrderList = () => {
   const columns = [
     {
       field: "_id",
-      headerName: "Order ID",
+      headerName: "Mã đơn",
       width: 220,
       renderCell: (params) => (
         <OrderId>#{params.row._id?.slice(-8).toUpperCase()}</OrderId>
@@ -83,7 +99,7 @@ const OrderList = () => {
 
     {
       field: "total",
-      headerName: "Amount",
+      headerName: "Tổng tiền",
       width: 140,
       renderCell: (params) => (
         <Amount>{params.row.total?.toLocaleString("vi-VN")}₫</Amount>
@@ -92,7 +108,7 @@ const OrderList = () => {
 
     {
       field: "delivery_status",
-      headerName: "Delivery",
+      headerName: "Giao hàng",
       width: 150,
       renderCell: (params) => {
         const status = params.row.delivery_status ?? "";
@@ -103,7 +119,15 @@ const OrderList = () => {
             $color={style.color}
             $border={style.border}
           >
-            {status || "—"}
+            {status === "pending"
+              ? "Chờ xử lý"
+              : status === "delivering"
+                ? "Đang giao"
+                : status === "delivered"
+                  ? "Đã giao"
+                  : status === "cancelled"
+                    ? "Đã hủy"
+                    : status || "—"}
           </StatusBadge>
         );
       },
@@ -111,31 +135,45 @@ const OrderList = () => {
 
     {
       field: "payment_status",
-      headerName: "Payment",
-      width: 150,
+      headerName: "Thanh toán",
+      width: 220,
+
       renderCell: (params) => {
         const status = params.row.payment_status ?? "";
         const style = getPaymentStyle(status);
+
         return (
-          <StatusBadge
-            $bg={style.bg}
-            $color={style.color}
-            $border={style.border}
-          >
-            {status || "—"}
-          </StatusBadge>
+          <PaymentWrapper>
+            <StatusBadge
+              $bg={style.bg}
+              $color={style.color}
+              $border={style.border}
+            >
+              {status === "paid"
+                ? "Đã thanh toán"
+                : status === "pending"
+                  ? "Chờ TT"
+                  : status}
+            </StatusBadge>
+
+            {params.row.paymentMethod === "manual" && status === "pending" && (
+              <PayBtn onClick={() => updatePaymentStatus(params.row._id)}>
+                Xác nhận
+              </PayBtn>
+            )}
+          </PaymentWrapper>
         );
       },
     },
 
     {
       field: "actions",
-      headerName: "Actions",
-      width: 260,
+      headerName: "Thao tác",
+      width: 340,
       renderCell: (params) => (
         <Actions>
           <View onClick={() => navigate(`/admin/order/${params.row._id}`)}>
-            View
+            Chi tiết
           </View>
 
           {/* DELIVERY BUTTON */}
@@ -146,7 +184,7 @@ const OrderList = () => {
               <ActionBtn
                 onClick={() => updateStatus(params.row._id, "delivering")}
               >
-                Delivery
+                Giao hàng
               </ActionBtn>
             )}
 
@@ -157,7 +195,7 @@ const OrderList = () => {
               <ActionBtnGreen
                 onClick={() => updateStatus(params.row._id, "delivered")}
               >
-                Complete
+                Hoàn thành
               </ActionBtnGreen>
             )}
         </Actions>
@@ -182,7 +220,6 @@ const OrderList = () => {
         columns={columns}
         getRowId={(row) => row._id}
         pageSizeOptions={[5, 10]}
-        checkboxSelection
         sx={{
           border: 0,
           fontFamily: "inherit",
@@ -268,7 +305,7 @@ const View = styled.button`
   color: #1d4ed8;
   border: 0.5px solid #93c5fd;
   border-radius: 6px;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: opacity 0.15s;
@@ -313,5 +350,37 @@ const ActionBtnGreen = styled.button`
   transition: opacity 0.15s;
   &:hover {
     opacity: 0.82;
+  }
+`;
+
+const PaymentWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+`;
+
+const PayBtn = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 28px;
+  padding: 0 10px;
+
+  border: none;
+  border-radius: 6px;
+
+  background: #16a34a;
+  color: white;
+
+  font-size: 11px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: opacity 0.15s;
+
+  &:hover {
+    opacity: 0.88;
   }
 `;

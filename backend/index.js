@@ -18,9 +18,11 @@ const orderStats = require("./stats/OrderStat");
 const incomeStats = require("./stats/IncomeStat");
 const forgotPasswordRoute = require("./routes/ForgotPasswordRoute");
 const userRoute = require("./routes/UserRoute");
+const manualOrderRoutes = require("./routes/ManualOrderRoute");
 
 const app = express();
 
+app.set("trust proxy", 1);
 app.use(cors());
 
 app.use("/api/stripe", stripeRoute);
@@ -54,6 +56,7 @@ app.use("/api/orders", orderStats);
 app.use("/api/income", incomeStats);
 app.use("/api", forgotPasswordRoute);
 app.use("/api/users", userRoute);
+app.use("/api/manual-order", manualOrderRoutes);
 
 /* ============================
    STATIC FILES

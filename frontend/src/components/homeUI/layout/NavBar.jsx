@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import styled from "styled-components";
 import { logoutUser } from "../../../features/auth/AuthSlice";
-import { clearCart } from "../../../features/cart/CartSlice";
+import { clearCart, resetCart } from "../../../features/cart/CartSlice";
 import { toast } from "react-toastify";
 import { useState } from "react";
 
@@ -74,7 +74,7 @@ const NavBar = () => {
                 `cartItems_${auth._id}`,
                 JSON.stringify(cartItems),
               );
-              dispatch(clearCart());
+              dispatch(resetCart());
               dispatch(logoutUser());
               toast.warning("Logged out!", { position: "bottom-left" });
               navigate("/");

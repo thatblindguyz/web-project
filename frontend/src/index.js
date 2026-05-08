@@ -1,61 +1,13 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+
 import App from "./App";
 
 import { Provider } from "react-redux";
-import { configureStore } from "@reduxjs/toolkit";
 
-/* ============================
-   IMPORT SLICES
-============================ */
+import { store } from "./features/Store";
 
-import authReducer, { loadUser } from "./features/auth/AuthSlice";
-
-import productReducer from "./features/product/ProductSlice";
-
-import cartReducer, { getTotals } from "./features/cart/CartSlice";
-
-import { productAPI } from "./features/product/ProductAPI";
-
-import userReducer from "./features/user/UserSlice";
-
-import orderReducer from "./features/order/OrderSlice";
-
-/* ============================
-   CONFIGURE STORE
-============================ */
-
-const store = configureStore({
-  reducer: {
-    auth: authReducer,
-
-    products: productReducer,
-
-    cart: cartReducer,
-
-    users: userReducer,
-
-    orders: orderReducer,
-
-    // RTK Query
-    [productAPI.reducerPath]: productAPI.reducer,
-  },
-
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(productAPI.middleware),
-});
-
-/* ============================
-   INITIAL DISPATCH
-============================ */
-
-store.dispatch(loadUser());
-
-store.dispatch(getTotals());
-
-/* ============================
-   RENDER APP
-============================ */
+/* ================= RENDER APP ================= */
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
@@ -67,8 +19,6 @@ root.render(
   </React.StrictMode>,
 );
 
-/* ============================
-   DEBUG
-============================ */
+/* ================= DEBUG ================= */
 
 console.log("Redux state:", store.getState());

@@ -24,7 +24,7 @@ const Transactions = () => {
 
   return (
     <StyledTransactions>
-      <TableTitle>Latest Transactions</TableTitle>
+      <TableTitle>Các Giao Dịch Gần Đây</TableTitle>
 
       {isLoading ? (
         <LoadingRow>
@@ -34,9 +34,9 @@ const Transactions = () => {
       ) : (
         <>
           <TransactionHeader>
-            <p>Date</p>
-            <p>Total</p>
-            <p>Delivery</p>
+            <p>Ngày</p>
+            <p>Số Tiền</p>
+            <p>Trạng Thái Giao Hàng</p>
           </TransactionHeader>
 
           {orders?.map((order, index) => (

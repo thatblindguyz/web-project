@@ -76,7 +76,6 @@ const UserList = () => {
         columns={columns}
         getRowId={(row) => row._id}
         pageSizeOptions={[5, 10]}
-        checkboxSelection
         sx={{
           border: 0,
           fontFamily: "inherit",

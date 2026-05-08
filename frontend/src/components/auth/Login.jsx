@@ -23,10 +23,10 @@ const Login = () => {
   /* Redirect after login */
   useEffect(() => {
     if (auth._id) {
-      const saved = localStorage.getItem(`cartItems_${auth._id}`);
-      console.log("Login → saved cart:", saved);
       dispatch(loadCart(auth._id));
+
       dispatch(getTotals());
+
       navigate("/");
     }
   }, [auth._id, navigate, dispatch]);

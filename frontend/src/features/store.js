@@ -1,16 +1,59 @@
-import { configureStore } from "@reduxjs/toolkit";
+import { configureStore, combineReducers } from "@reduxjs/toolkit";
 
-import authReducer from "./authSlice";
-import cartReducer from "./cartSlice";
-import productReducer from "./productSlice";
+import { persistStore, persistReducer } from "redux-persist";
+
+import storage from "redux-persist/lib/storage";
+
+import authReducer from "./auth/AuthSlice";
+import cartReducer from "./cart/CartSlice";
+import productReducer from "./product/ProductSlice";
+import userReducer from "./user/UserSlice";
+import orderReducer from "./order/OrderSlice";
+
+import { productAPI } from "./product/ProductAPI";
+
+/* ================= ROOT REDUCER ================= */
+
+const rootReducer = combineReducers({
+  products: productReducer,
+
+  cart: cartReducer,
+
+  auth: authReducer,
+
+  users: userReducer,
+
+  orders: orderReducer,
+
+  // RTK QUERY
+  [productAPI.reducerPath]: productAPI.reducer,
+});
+
+/* ================= PERSIST CONFIG ================= */
+
+const persistConfig = {
+  key: "root",
+
+  storage,
+
+  whitelist: ["auth"],
+};
+
+/* ================= PERSIST REDUCER ================= */
+
+const persistedReducer = persistReducer(persistConfig, rootReducer);
+
+/* ================= STORE ================= */
 
 export const store = configureStore({
-  reducer: {
-    products: productReducer,
-    cart: cartReducer,
-    auth: authSlice,
+  reducer: persistedReducer,
 
-    users: userReducer,
-    orders: orderReducer,
-  },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: false,
+    }).concat(productAPI.middleware),
 });
+
+/* ================= PERSISTOR ================= */
+
+export const persistor = persistStore(store);
