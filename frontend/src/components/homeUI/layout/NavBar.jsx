@@ -25,7 +25,7 @@ const NavBar = () => {
     navigate(`/?search=${encodeURIComponent(search.trim())}`);
   };
 
-  /* ================= POLLING CHAT CHO ADMIN ================= */
+  /* Admin polling chat */
   useEffect(() => {
     if (!auth?.isAdmin) return;
 
