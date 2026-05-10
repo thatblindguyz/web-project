@@ -4,7 +4,7 @@ import { loginUser } from "../../features/auth/AuthSlice";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import styled, { keyframes } from "styled-components";
-import { loadCart, getTotals } from "../../features/cart/CartSlice";
+import { getTotals } from "../../features/cart/CartSlice";
 
 /* ============================
    COMPONENT
@@ -23,7 +23,7 @@ const Login = () => {
   /* Redirect after login */
   useEffect(() => {
     if (auth._id) {
-      dispatch(loadCart(auth._id));
+      // dispatch(loadCart(auth._id));
 
       dispatch(getTotals());
 

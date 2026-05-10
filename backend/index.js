@@ -19,6 +19,7 @@ const incomeStats = require("./stats/IncomeStat");
 const forgotPasswordRoute = require("./routes/ForgotPasswordRoute");
 const userRoute = require("./routes/UserRoute");
 const manualOrderRoutes = require("./routes/ManualOrderRoute");
+const chatRoute = require("./routes/ChatRoute");
 
 const app = express();
 
@@ -57,6 +58,7 @@ app.use("/api/income", incomeStats);
 app.use("/api", forgotPasswordRoute);
 app.use("/api/users", userRoute);
 app.use("/api/manual-order", manualOrderRoutes);
+app.use("/api/chat", chatRoute);
 
 /* ============================
    STATIC FILES

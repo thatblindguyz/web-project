@@ -1,6 +1,6 @@
 const Order = require("../models/order");
+const Product = require("../models/product");
 const { auth, isAdmin } = require("../middleware/auth");
-
 const router = require("express").Router();
 
 /* ============================
@@ -211,6 +211,24 @@ router.put("/cancel/:id", auth, async (req, res) => {
     if (order.delivery_status === "delivered") {
       return res.status(400).send("Already delivered");
     }
+
+    if (order.delivery_status === "cancelled") {
+      return res.status(400).send("Order already cancelled");
+    }
+
+    /* ================= RESTORE STOCK ================= */
+
+    for (const item of order.products) {
+      const product = await Product.findById(item.id);
+
+      if (product) {
+        product.quantity += item.cartQuantity;
+
+        await product.save();
+      }
+    }
+
+    /* ================= UPDATE STATUS ================= */
 
     order.delivery_status = "cancelled";
 

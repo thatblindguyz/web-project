@@ -140,7 +140,10 @@ const OrderList = () => {
 
       renderCell: (params) => {
         const status = params.row.payment_status ?? "";
-        const style = getPaymentStyle(status);
+        const style =
+          params.row.delivery_status === "cancelled"
+            ? paymentColors.failed
+            : getPaymentStyle(status);
 
         return (
           <PaymentWrapper>
@@ -149,18 +152,23 @@ const OrderList = () => {
               $color={style.color}
               $border={style.border}
             >
-              {status === "paid"
-                ? "Đã thanh toán"
-                : status === "pending"
-                  ? "Chờ TT"
-                  : status}
+              {params.row.delivery_status === "cancelled"
+                ? "Đã hủy"
+                : status === "paid"
+                  ? "Đã thanh toán"
+                  : status === "pending"
+                    ? "Chờ TT"
+                    : status}
             </StatusBadge>
 
-            {params.row.paymentMethod === "manual" && status === "pending" && (
-              <PayBtn onClick={() => updatePaymentStatus(params.row._id)}>
-                Xác nhận
-              </PayBtn>
-            )}
+            {params.row.delivery_status !== "cancelled" &&
+              (params.row.paymentMethod === "manual" ||
+                params.row.paymentMethod === "stripe") &&
+              status === "pending" && (
+                <PayBtn onClick={() => updatePaymentStatus(params.row._id)}>
+                  Xác nhận TT
+                </PayBtn>
+              )}
           </PaymentWrapper>
         );
       },

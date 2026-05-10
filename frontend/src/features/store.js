@@ -36,7 +36,7 @@ const persistConfig = {
 
   storage,
 
-  whitelist: ["auth"],
+  whitelist: ["auth", "cart"],
 };
 
 /* ================= PERSIST REDUCER ================= */

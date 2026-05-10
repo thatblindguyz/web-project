@@ -15,6 +15,7 @@ const PayButton = ({ cartItems }) => {
     name: "",
     phone: "",
     address: "",
+    email: "",
   });
 
   /* ================= STRIPE ================= */
@@ -45,6 +46,7 @@ const PayButton = ({ cartItems }) => {
         items: cartItems,
         userId: auth._id,
         totalAmount: cartTotalAmount,
+        customerInfo,
       });
       setShowQR(false);
       navigate("/checkout-success");
@@ -79,15 +81,17 @@ const PayButton = ({ cartItems }) => {
             <ModalHeader>
               <HeaderLeft>
                 <ModalTitle>Thanh toán chuyển khoản</ModalTitle>
-                <ModalSub>
-                  Quét mã QR hoặc chuyển khoản theo thông tin bên dưới
-                </ModalSub>
               </HeaderLeft>
               <CloseBtn onClick={() => setShowQR(false)}>✕</CloseBtn>
             </ModalHeader>
 
             <Divider />
 
+            <ModalSub>
+              Quét mã QR hoặc chuyển khoản theo thông tin bên dưới
+            </ModalSub>
+
+            <Divider />
             {/* BODY – 2 cột */}
             <ModalBody>
               {/* CỘT TRÁI – QR */}
@@ -131,6 +135,21 @@ const PayButton = ({ cartItems }) => {
                       setCustomerInfo({
                         ...customerInfo,
                         phone: e.target.value,
+                      })
+                    }
+                  />
+                </FieldGroup>
+
+                <FieldGroup>
+                  <FieldLabel>Email</FieldLabel>
+                  <Input
+                    type="email"
+                    placeholder="example@gmail.com"
+                    value={customerInfo.email}
+                    onChange={(e) =>
+                      setCustomerInfo({
+                        ...customerInfo,
+                        email: e.target.value,
                       })
                     }
                   />
@@ -301,7 +320,7 @@ const Modal = styled.div`
   background: #fff;
   border-radius: 16px;
   width: 100%;
-  max-width: 720px;
+  max-width: 980px;
   display: flex;
   flex-direction: column;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
@@ -316,22 +335,33 @@ const ModalHeader = styled.div`
   justify-content: space-between;
   padding: 1.25rem 1.5rem 1rem;
 `;
+
 const HeaderLeft = styled.div`
   display: flex;
   flex-direction: column;
   gap: 2px;
 `;
+
 const ModalTitle = styled.h3`
   font-size: 16px;
   font-weight: 700;
   color: #0f172a;
   margin: 0;
 `;
+
 const ModalSub = styled.p`
-  font-size: 30px;
-  font-weight: 700;
-  color: #334155;
+  font-size: 14px;
+  color: #64748b;
+  text-align: center;
+  width: 100%;
+  margin: 0 auto;
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 500;
 `;
+
 const CloseBtn = styled.button`
   width: 28px !important;
   height: 28px !important;
@@ -339,18 +369,13 @@ const CloseBtn = styled.button`
   font-size: 18px;
   border: none;
   background: transparent;
-
   color: #94a3b8;
   font-weight: 700;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   cursor: pointer;
-
   padding: 0;
-
   flex: unset !important;
 `;
 
@@ -369,13 +394,16 @@ const ModalBody = styled.div`
     flex-direction: column;
   }
 `;
+
 const LeftCol = styled.div`
-  flex: 1;
+  flex: 1.4;
   display: flex;
   flex-direction: column;
   gap: 10px;
   min-width: 0;
+  align-items: flex-start;
 `;
+
 const RightCol = styled.div`
   flex: 0 0 220px;
   display: flex;
@@ -388,6 +416,7 @@ const RightCol = styled.div`
     padding-top: 1.25rem;
   }
 `;
+
 const ColDivider = styled.div`
   width: 1px;
   background: #f1f5f9;
@@ -399,6 +428,7 @@ const ColDivider = styled.div`
     margin: 1.25rem 0 0;
   }
 `;
+
 const ColLabel = styled.p`
   font-size: 11px;
   font-weight: 600;
@@ -406,6 +436,8 @@ const ColLabel = styled.p`
   text-transform: uppercase;
   letter-spacing: 0.06em;
   margin: 0 0 2px;
+  text-align: left;
+  width: 100%;
 `;
 
 /* ── FORM ── */
@@ -413,15 +445,18 @@ const FieldGroup = styled.div`
   display: flex;
   flex-direction: column;
   gap: 4px;
+  width: 100%;
 `;
+
 const FieldLabel = styled.label`
   font-size: 12px;
   font-weight: 500;
   color: #64748b;
+  text-align: left;
 `;
 const Input = styled.input`
   width: 100%;
-  height: 38px;
+  height: 44px;
   border-radius: 8px;
   border: 1px solid #e2e8f0;
   padding: 0 12px;
@@ -441,6 +476,8 @@ const Input = styled.input`
 
 /* ── BANK INFO BOX ── */
 const InfoBox = styled.div`
+  width: 100%;
+  box-sizing: border-box;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: 10px;
@@ -497,7 +534,7 @@ const QRImage = styled.img`
   border-radius: 8px;
 `;
 const QRNote = styled.p`
-  font-size: 28px;
+  font-size: 12px;
   font-weight: 700;
   color: #334155;
   text-align: center;
@@ -518,7 +555,7 @@ const ModalFooter = styled.div`
   background: #f8fafc;
 `;
 const Note = styled.p`
-  font-size: 26px;
+  font-size: 13px;
   font-weight: 700;
   color: #334155;
   margin: 0;

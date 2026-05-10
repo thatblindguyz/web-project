@@ -7,21 +7,21 @@ const initialState = {
   cartTotalAmount: 0,
 };
 
-const saveCart = (items, userId) => {
-  const key = userId ? `cartItems_${userId}` : "cartItems";
-  localStorage.setItem(key, JSON.stringify(items));
-};
+// const saveCart = (items, userId) => {
+//   const key = userId ? `cartItems_${userId}` : "cartItems";
+//   localStorage.setItem(key, JSON.stringify(items));
+// };
 
 const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
-    loadCart: (state, action) => {
-      const userId = action.payload;
-      const saved = localStorage.getItem(`cartItems_${userId}`);
-      console.log("loadCart → key:", `cartItems_${userId}`, "| saved:", saved);
-      state.cartItems = saved ? JSON.parse(saved) : [];
-    },
+    //   loadCart: (state, action) => {
+    //     const userId = action.payload;
+    //     const saved = localStorage.getItem(`cartItems_${userId}`);
+    //     console.log("loadCart → key:", `cartItems_${userId}`, "| saved:", saved);
+    //     state.cartItems = saved ? JSON.parse(saved) : [];
+    //   },
 
     addToCart: (state, action) => {
       const itemIndex = state.cartItems.findIndex(
@@ -66,7 +66,7 @@ const cartSlice = createSlice({
           position: "bottom-left",
         });
       }
-      saveCart(state.cartItems, action.payload?.userId);
+      // saveCart(state.cartItems, action.payload?.userId);
     },
 
     removeFromCart: (state, action) => {
@@ -74,7 +74,7 @@ const cartSlice = createSlice({
         (cartItem) => cartItem._id !== action.payload._id,
       );
       state.cartItems = nextCartItems;
-      saveCart(state.cartItems, action.payload?.userId);
+      // saveCart(state.cartItems, action.payload?.userId);
       toast.error(`${action.payload.name} removed from cart`, {
         position: "bottom-left",
       });
@@ -105,7 +105,7 @@ const cartSlice = createSlice({
         });
       }
 
-      saveCart(state.cartItems, action.payload?.userId);
+      // saveCart(state.cartItems, action.payload?.userId);
     },
 
     clearCart: (state, action) => {
@@ -161,7 +161,7 @@ export const {
   decreaseCart,
   clearCart,
   getTotals,
-  loadCart,
+  // loadCart,
   resetCart,
 } = cartSlice.actions;
 

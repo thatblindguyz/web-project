@@ -4,7 +4,10 @@ import styled from "styled-components";
 import { logoutUser } from "../../../features/auth/AuthSlice";
 import { clearCart, resetCart } from "../../../features/cart/CartSlice";
 import { toast } from "react-toastify";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { persistor } from "../../../features/Store";
+import axios from "axios";
+import { url, setHeaders } from "../../../features/api";
 
 const NavBar = () => {
   const dispatch = useDispatch();
@@ -13,10 +16,48 @@ const NavBar = () => {
   const auth = useSelector((state) => state.auth);
   const [search, setSearch] = useState("");
 
+  // Thông báo chat cho admin
+  const [unreadCount, setUnreadCount] = useState(0);
+  const prevLastMessages = useRef({});
+
   const handleSearch = (e) => {
     e.preventDefault();
     navigate(`/?search=${encodeURIComponent(search.trim())}`);
   };
+
+  /* ================= POLLING CHAT CHO ADMIN ================= */
+  useEffect(() => {
+    if (!auth?.isAdmin) return;
+
+    const fetchConversations = async () => {
+      try {
+        const res = await axios.get(
+          `${url}/chat/admin/conversations`,
+          setHeaders(),
+        );
+        const conversations = res.data;
+
+        let newUnread = 0;
+        conversations.forEach((conv) => {
+          const prevLast = prevLastMessages.current[conv._id];
+          if (prevLast !== undefined && prevLast !== conv.lastMessage) {
+            newUnread++;
+          }
+          prevLastMessages.current[conv._id] = conv.lastMessage;
+        });
+
+        if (newUnread > 0) {
+          setUnreadCount((prev) => prev + newUnread);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchConversations();
+    const interval = setInterval(fetchConversations, 3000);
+    return () => clearInterval(interval);
+  }, [auth?.isAdmin]);
 
   return (
     <Nav>
@@ -65,13 +106,43 @@ const NavBar = () => {
       {/* AUTH */}
       {auth._id ? (
         <Links>
-          {auth.isAdmin && <Link to="/admin/summary">Admin</Link>}
+          {auth.isAdmin && (
+            <>
+              {/* NOTIFICATION */}
+              <BellWrapper
+                onClick={() => {
+                  setUnreadCount(0);
+                  navigate("/admin/chat");
+                }}
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                </svg>
+                {unreadCount > 0 && (
+                  <BellBadge>{unreadCount > 9 ? "9+" : unreadCount}</BellBadge>
+                )}
+              </BellWrapper>
+
+              <Link to="/admin/summary">Admin</Link>
+            </>
+          )}
+
           {!auth.isAdmin && <Link to="/my-orders">My Orders</Link>}
           <UserGreeting>Xin chào, {auth.name}</UserGreeting>
           <LogoutBtn
             onClick={() => {
               localStorage.setItem(
-                `cartItems_${auth._id}`,
+                `cart_${auth._id}`,
                 JSON.stringify(cartItems),
               );
               dispatch(resetCart());
@@ -96,7 +167,6 @@ const NavBar = () => {
 export default NavBar;
 
 /* ================= STYLES ================= */
-
 const Nav = styled.nav`
   display: flex;
   align-items: center;
@@ -205,6 +275,43 @@ const Links = styled.div`
       color: #1d4ed8;
     }
   }
+`;
+
+const BellWrapper = styled.div`
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  color: #cbd5e1;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #f8fafc;
+  }
+`;
+
+const BellBadge = styled.span`
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: #dc2626;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
 `;
 
 const LogoutBtn = styled.div`

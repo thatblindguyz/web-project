@@ -40,7 +40,6 @@ const Home = () => {
               >
                 <ProductImg src={product.image} alt={product.name} />
                 <ProductTitle>{product.name}</ProductTitle>
-                <ShortDesc>{product.shortDesc || "No description"}</ShortDesc>
                 <PriceBlock>
                   {product.isDiscount && product.discountPercent > 0 ? (
                     <>
@@ -147,12 +146,11 @@ const ProductTitle = styled.h3`
   font-weight: 600;
   color: #1e293b;
   margin: 8px 0 4px;
-`;
-
-const ShortDesc = styled.p`
-  font-size: 13px;
-  color: #64748b;
-  margin: 0 0 6px;
+  min-height: 80px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 `;
 
 const Price = styled.p`

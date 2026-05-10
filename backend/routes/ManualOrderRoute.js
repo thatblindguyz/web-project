@@ -70,7 +70,7 @@ router.post("/create", express.json(), async (req, res) => {
       shipping: {
         name: customerInfo?.name || "",
 
-        email: "",
+        email: customerInfo?.email || "",
 
         phone: customerInfo?.phone || "",
 

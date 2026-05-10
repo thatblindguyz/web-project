@@ -7,6 +7,7 @@ import {
   decreaseCart,
   removeFromCart,
   getTotals,
+  // loadCart,
 } from "../../../features/cart/CartSlice";
 
 import { useEffect } from "react";
@@ -17,6 +18,12 @@ const Cart = () => {
   const auth = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  // useEffect(() => {
+  //   if (auth._id) {
+  //     dispatch(loadCart(auth._id));
+  //   }
+  // }, [auth._id, dispatch]);
 
   useEffect(() => {
     dispatch(getTotals());

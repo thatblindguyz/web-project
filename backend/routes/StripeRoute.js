@@ -207,6 +207,7 @@ const createOrder = async (customer, data) => {
       },
 
       payment_status: data.payment_status,
+      paymentMethod: "stripe",
     });
 
     const savedOrder = await newOrder.save();
