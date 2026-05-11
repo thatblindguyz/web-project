@@ -1,5 +1,3 @@
-// backend/routes/ChatRoute.js
-
 const router = require("express").Router();
 
 const Conversation = require("../models/Chat");
@@ -7,9 +5,7 @@ const Message = require("../models/Message");
 
 const { auth, isAdmin } = require("../middleware/auth");
 
-/* =========================
-   USER SEND MESSAGE
-========================= */
+/* user sends message */
 
 router.post("/send", auth, async (req, res) => {
   try {
@@ -53,9 +49,7 @@ router.post("/send", auth, async (req, res) => {
   }
 });
 
-/* =========================
-   GET USER MESSAGES
-========================= */
+/* GET USER MESSAGES */
 
 router.get("/messages", auth, async (req, res) => {
   try {
@@ -79,9 +73,7 @@ router.get("/messages", auth, async (req, res) => {
   }
 });
 
-/* =========================
-   ADMIN GET CONVERSATIONS
-========================= */
+/* ADMIN chat */
 
 router.get("/admin/conversations", auth, isAdmin, async (req, res) => {
   try {
