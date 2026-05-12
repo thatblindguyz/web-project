@@ -3,10 +3,16 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { url } from "../../../features/api";
+import { useDispatch, useSelector } from "react-redux";
+import { addToCart, getTotals } from "../../../features/cart/CartSlice";
+import { useNavigate } from "react-router-dom";
 
 const ProductPage = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
+  const dispatch = useDispatch();
+  const auth = useSelector((state) => state.auth);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -20,22 +26,29 @@ const ProductPage = () => {
     fetchProduct();
   }, [id]);
 
-  if (!product) return <Loading>Loading...</Loading>;
+  const handleAddToCart = () => {
+    dispatch(addToCart({ ...product, userId: auth._id }));
+    dispatch(getTotals());
+  };
+
+  if (!product) return <Loading>Đang tải...</Loading>;
 
   return (
     <Wrapper>
+      <BackButton onClick={() => navigate("/")}>← Trở về trang chủ</BackButton>
       <Card>
-        {/* IMAGE */}
+        {/* ẢNH */}
         <ImageContainer>
           <img src={product.image} alt={product.name} />
         </ImageContainer>
 
         <Divider />
 
-        {/* INFO */}
+        {/* THÔNG TIN */}
         <InfoSection>
           <ProductName>{product.name}</ProductName>
 
+          {/* GIÁ */}
           {product.isDiscount && product.discountPercent > 0 ? (
             <>
               <PriceValue>
@@ -45,20 +58,39 @@ const ProductPage = () => {
                 ).toLocaleString("vi-VN")}
                 ₫
               </PriceValue>
-
               <OldPrice>{product.price?.toLocaleString("vi-VN")}₫</OldPrice>
             </>
           ) : (
             <PriceValue>{product.price?.toLocaleString("vi-VN")}₫</PriceValue>
           )}
 
-          <SectionTitle>Description</SectionTitle>
+          {/* TỒN KHO */}
+          <Stock
+            $out={product.quantity === 0}
+            $low={product.quantity <= 3 && product.quantity > 0}
+          >
+            {product.quantity === 0
+              ? "Hết hàng"
+              : product.quantity <= 3
+                ? `Chỉ còn ${product.quantity} sản phẩm`
+                : `Còn hàng: ${product.quantity}`}
+          </Stock>
 
-          <Desc>{product.desc || "Updating..."}</Desc>
+          {/* MÔ TẢ */}
+          <SectionTitle>Mô tả</SectionTitle>
+          <Desc>{product.desc || "Đang cập nhật..."}</Desc>
 
-          {/* WARRANTY */}
-          <SectionTitle>Warranty</SectionTitle>
-          <Value>{product.warranty || "12 months"}</Value>
+          {/* BẢO HÀNH */}
+          <SectionTitle>Bảo hành</SectionTitle>
+          <Value>{product.warranty || "12 tháng"}</Value>
+
+          {/* NÚT THÊM VÀO GIỎ */}
+          <AddButton
+            disabled={product.quantity === 0}
+            onClick={handleAddToCart}
+          >
+            {product.quantity === 0 ? "Hết hàng" : "Thêm vào giỏ hàng"}
+          </AddButton>
         </InfoSection>
       </Card>
     </Wrapper>
@@ -91,7 +123,6 @@ const Card = styled.div`
   align-items: flex-start;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
   max-width: 100%;
-
   @media (max-width: 600px) {
     flex-direction: column;
   }
@@ -100,7 +131,6 @@ const Card = styled.div`
 const ImageContainer = styled.div`
   flex-shrink: 0;
   width: 260px;
-
   img {
     width: 100%;
     aspect-ratio: 1;
@@ -108,7 +138,6 @@ const ImageContainer = styled.div`
     border-radius: 8px;
     border: 1px solid #e2e8f0;
   }
-
   @media (max-width: 600px) {
     width: 100%;
   }
@@ -141,10 +170,11 @@ const PriceValue = styled.span`
   color: #1d4ed8;
 `;
 
-const ShortDesc = styled.p`
-  font-size: 14px;
-  color: #475569;
-  margin: 4px 0;
+const Stock = styled.p`
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0;
+  color: ${(p) => (p.$out ? "#dc2626" : p.$low ? "#d97706" : "#16a34a")};
 `;
 
 const SectionTitle = styled.h3`
@@ -154,12 +184,14 @@ const SectionTitle = styled.h3`
   text-transform: uppercase;
   letter-spacing: 0.08em;
   margin-top: 0.8rem;
+  margin-bottom: 0;
 `;
 
 const Desc = styled.p`
   font-size: 14px;
   color: #475569;
-  white-space: pre-line; /* ⭐ giữ xuống dòng */
+  white-space: pre-line;
+  margin: 0;
 `;
 
 const Value = styled.span`
@@ -171,4 +203,41 @@ const OldPrice = styled.span`
   font-size: 14px;
   color: #94a3b8;
   text-decoration: line-through;
+`;
+
+const AddButton = styled.button`
+  margin-top: 0.5rem;
+  width: fit-content;
+  padding: 0 1.5rem;
+  height: 40px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  transition: opacity 0.15s;
+  cursor: ${(p) => (p.disabled ? "not-allowed" : "pointer")};
+  background: ${(p) => (p.disabled ? "#e2e8f0" : "#1d4ed8")};
+  color: ${(p) => (p.disabled ? "#94a3b8" : "#ffffff")};
+
+  &:hover:not(:disabled) {
+    opacity: 0.88;
+  }
+`;
+
+const BackButton = styled.button`
+  margin-bottom: 1rem;
+  padding: 0 1rem;
+  height: 36px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
+  background: #1e293b;
+  color: #ffffff;
+  cursor: pointer;
+  transition: 0.15s;
+
+  &:hover {
+    background: #0f172a;
+  }
 `;

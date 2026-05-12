@@ -100,7 +100,7 @@ const Summary = () => {
     {
       icon: <FaUsers />,
       digit: users[0]?.total,
-      title: "Users",
+      title: "Người dùng",
       percentage: usersPerc,
       lastMonth: users[1]?.total,
       onClick: () => navigate("/admin/users"),
@@ -108,7 +108,7 @@ const Summary = () => {
     {
       icon: <FaClipboard />,
       digit: orders[0]?.total,
-      title: "Orders",
+      title: "Đơn hàng",
       percentage: ordersPerc,
       lastMonth: orders[1]?.total,
       onClick: () => navigate("/admin/orders"),
@@ -116,7 +116,7 @@ const Summary = () => {
     {
       icon: <FaChartBar />,
       digit: income[0]?.total,
-      title: "Earnings",
+      title: "Doanh thu",
       lastMonth: income[1]?.total,
       percentage: incomePerc,
       isMoney: true,
@@ -129,8 +129,11 @@ const Summary = () => {
         {/* ===== OVERVIEW ===== */}
         <Overview>
           <OverviewHeader>
-            <OverviewTitle>Overview</OverviewTitle>
-            <OverviewSub>Click Users or Orders to view details.</OverviewSub>
+            <OverviewTitle>Tổng quan</OverviewTitle>
+            <OverviewSub>
+              {" "}
+              Nhấn vào Người dùng hoặc Đơn hàng để xem chi tiết.
+            </OverviewSub>
           </OverviewHeader>
 
           <WidgetWrapper>

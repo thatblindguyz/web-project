@@ -5,6 +5,18 @@ import axios from "axios";
 import moment from "moment";
 
 const Transactions = () => {
+  const deliveryStatusText = {
+    pending: "Chờ xử lý",
+    delivering: "Đang giao",
+    delivered: "Đã giao",
+    cancelled: "Đã hủy",
+  };
+
+  const paymentStatusText = {
+    pending: "Chờ TT",
+    paid: "Đã TT",
+  };
+
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -34,9 +46,10 @@ const Transactions = () => {
       ) : (
         <>
           <TransactionHeader>
-            <p>Ngày</p>
-            <p>Số Tiền</p>
-            <p>Trạng Thái Giao Hàng</p>
+            <p>Ngày</p>
+            <p>Số Tiền</p>
+            <p>Giao Hàng</p>
+            <p>Thanh Toán</p>
           </TransactionHeader>
 
           {orders?.map((order, index) => (
@@ -44,8 +57,17 @@ const Transactions = () => {
               <p>{moment(order.createdAt).format("DD/MM")}</p>
               <TotalCell>{order.total.toLocaleString("vi-VN")}₫</TotalCell>
               <StatusBadge $status={order.delivery_status}>
-                {order.delivery_status}
+                {deliveryStatusText[order.delivery_status] ||
+                  order.delivery_status}
               </StatusBadge>
+              {order.delivery_status === "cancelled" ? (
+                <span />
+              ) : (
+                <PaymentBadge $status={order.payment_status}>
+                  {paymentStatusText[order.payment_status] ||
+                    order.payment_status}
+                </PaymentBadge>
+              )}
             </Transaction>
           ))}
 
@@ -71,7 +93,7 @@ const spin = keyframes`
   to { transform: rotate(360deg); }
 `;
 
-const COLS = "0.8fr 1.1fr 1.3fr";
+const COLS = "0.7fr 1fr 1.1fr 1.1fr";
 
 const StyledTransactions = styled.div`
   background: #ffffff;
@@ -145,26 +167,29 @@ const StatusBadge = styled.span`
   width: fit-content;
 
   background: ${({ $status }) =>
-    $status === "pending"
-      ? "#fefce8"
-      : $status === "delivered"
-        ? "#f0fdf4"
-        : "#fef2f2"};
+    ({
+      pending: "#fefce8",
+      delivering: "#eff6ff",
+      delivered: "#f0fdf4",
+      cancelled: "#fef2f2",
+    })[$status] || "#f8fafc"};
 
   color: ${({ $status }) =>
-    $status === "pending"
-      ? "#ca8a04"
-      : $status === "delivered"
-        ? "#16a34a"
-        : "#dc2626"};
+    ({
+      pending: "#ca8a04",
+      delivering: "#1d4ed8",
+      delivered: "#16a34a",
+      cancelled: "#dc2626",
+    })[$status] || "#64748b"};
 
   border: 1px solid
     ${({ $status }) =>
-      $status === "pending"
-        ? "#fde68a"
-        : $status === "delivered"
-          ? "#bbf7d0"
-          : "#fecaca"};
+      ({
+        pending: "#fde68a",
+        delivering: "#bfdbfe",
+        delivered: "#bbf7d0",
+        cancelled: "#fecaca",
+      })[$status] || "#e2e8f0"};
 `;
 
 const PaymentBadge = styled.span`
