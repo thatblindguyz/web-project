@@ -2,10 +2,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import styled from "styled-components";
 import { logoutUser } from "../../../features/auth/AuthSlice";
-import { clearCart, resetCart } from "../../../features/cart/CartSlice";
+import { resetCart } from "../../../features/cart/CartSlice";
 import { toast } from "react-toastify";
 import { useState, useEffect, useRef } from "react";
-import { persistor } from "../../../features/Store";
 import axios from "axios";
 import { url, setHeaders } from "../../../features/api";
 
@@ -15,47 +14,60 @@ const NavBar = () => {
   const { cartTotalQuantity, cartItems } = useSelector((state) => state.cart);
   const auth = useSelector((state) => state.auth);
   const [search, setSearch] = useState("");
-
-  // Thông báo chat cho admin
   const [unreadCount, setUnreadCount] = useState(0);
   const prevLastMessages = useRef({});
+  const [orderCount, setOrderCount] = useState(0);
+  const prevOrderRef = useRef(null);
 
   const handleSearch = (e) => {
     e.preventDefault();
     navigate(`/?search=${encodeURIComponent(search.trim())}`);
   };
 
-  /* Admin polling chat */
+  /* ================= POLLING CHAT ================= */
   useEffect(() => {
     if (!auth?.isAdmin) return;
-
     const fetchConversations = async () => {
       try {
         const res = await axios.get(
           `${url}/chat/admin/conversations`,
           setHeaders(),
         );
-        const conversations = res.data;
-
         let newUnread = 0;
-        conversations.forEach((conv) => {
+        res.data.forEach((conv) => {
           const prevLast = prevLastMessages.current[conv._id];
-          if (prevLast !== undefined && prevLast !== conv.lastMessage) {
+          if (prevLast !== undefined && prevLast !== conv.lastMessage)
             newUnread++;
-          }
           prevLastMessages.current[conv._id] = conv.lastMessage;
         });
-
-        if (newUnread > 0) {
-          setUnreadCount((prev) => prev + newUnread);
-        }
+        if (newUnread > 0) setUnreadCount((prev) => prev + newUnread);
       } catch (err) {
         console.log(err);
       }
     };
-
     fetchConversations();
     const interval = setInterval(fetchConversations, 3000);
+    return () => clearInterval(interval);
+  }, [auth?.isAdmin]);
+
+  /* ================= POLLING ORDER ================= */
+  useEffect(() => {
+    if (!auth?.isAdmin) return;
+    const fetchOrders = async () => {
+      try {
+        const res = await axios.get(`${url}/orders?new=true`, setHeaders());
+        const latestOrder = res.data?.[0]?._id;
+        if (prevOrderRef.current && prevOrderRef.current !== latestOrder) {
+          setOrderCount((prev) => prev + 1);
+          toast.info("Có đơn hàng mới!", { position: "top-right" });
+        }
+        prevOrderRef.current = latestOrder;
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchOrders();
+    const interval = setInterval(fetchOrders, 3000);
     return () => clearInterval(interval);
   }, [auth?.isAdmin]);
 
@@ -70,19 +82,23 @@ const NavBar = () => {
       <SearchForm onSubmit={handleSearch}>
         <SearchInput
           type="text"
-          placeholder="Search products..."
+          placeholder="Tìm kiếm sản phẩm..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
         <SearchButton type="submit">
           <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            fill="currentColor"
-            viewBox="0 0 16 16"
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           >
-            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zm-5.242 1.156a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z" />
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
         </SearchButton>
       </SearchForm>
@@ -91,13 +107,18 @@ const NavBar = () => {
       <Link to="/cart">
         <CartWrapper>
           <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            fill="currentColor"
-            viewBox="0 0 16 16"
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           >
-            <path d="M8 1a2 2 0 0 0-2 2v2H5V3a3 3 0 1 1 6 0v2h-1V3a2 2 0 0 0-2-2zM5 5H3.36a1.5 1.5 0 0 0-1.483 1.277L.85 13.13A2.5 2.5 0 0 0 3.322 16h9.355a2.5 2.5 0 0 0 2.473-2.87l-1.028-6.853A1.5 1.5 0 0 0 12.64 5H11v1.5a.5.5 0 0 1-1 0V5H6v1.5a.5.5 0 0 1-1 0V5z" />
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <path d="M16 10a4 4 0 0 1-8 0" />
           </svg>
           {cartTotalQuantity > 0 && <CartBadge>{cartTotalQuantity}</CartBadge>}
         </CartWrapper>
@@ -108,16 +129,17 @@ const NavBar = () => {
         <Links>
           {auth.isAdmin && (
             <>
-              {/* NOTIFICATION */}
-              <BellWrapper
+              {/* CHAT ICON */}
+              <IconBtn
+                title="Tin nhắn"
                 onClick={() => {
                   setUnreadCount(0);
                   navigate("/admin/chat");
                 }}
               >
                 <svg
-                  width="20"
-                  height="20"
+                  width="19"
+                  height="19"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -125,19 +147,45 @@ const NavBar = () => {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 >
-                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                 </svg>
                 {unreadCount > 0 && (
-                  <BellBadge>{unreadCount > 9 ? "9+" : unreadCount}</BellBadge>
+                  <IconBadge>{unreadCount > 9 ? "9+" : unreadCount}</IconBadge>
                 )}
-              </BellWrapper>
+              </IconBtn>
+
+              {/* ORDER ICON */}
+              <IconBtn
+                title="Đơn hàng mới"
+                onClick={() => {
+                  setOrderCount(0);
+                  navigate("/admin/orders");
+                }}
+              >
+                <svg
+                  width="19"
+                  height="19"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                  <line x1="8" y1="21" x2="16" y2="21" />
+                  <line x1="12" y1="17" x2="12" y2="21" />
+                </svg>
+                {orderCount > 0 && (
+                  <IconBadge>{orderCount > 9 ? "9+" : orderCount}</IconBadge>
+                )}
+              </IconBtn>
 
               <Link to="/admin/summary">Admin</Link>
             </>
           )}
 
-          {!auth.isAdmin && <Link to="/my-orders">My Orders</Link>}
+          {!auth.isAdmin && <Link to="/my-orders">Đơn của tôi</Link>}
           <UserGreeting>Xin chào, {auth.name}</UserGreeting>
           <LogoutBtn
             onClick={() => {
@@ -147,17 +195,17 @@ const NavBar = () => {
               );
               dispatch(resetCart());
               dispatch(logoutUser());
-              toast.warning("Logged out!", { position: "bottom-left" });
+              toast.warning("Đã đăng xuất!", { position: "bottom-left" });
               navigate("/");
             }}
           >
-            Logout
+            Đăng xuất
           </LogoutBtn>
         </Links>
       ) : (
         <AuthLinks>
-          <Link to="/login">Login</Link>
-          <Link to="/register">Register</Link>
+          <Link to="/login">Đăng nhập</Link>
+          <Link to="/register">Đăng ký</Link>
         </AuthLinks>
       )}
     </Nav>
@@ -174,7 +222,7 @@ const Nav = styled.nav`
   padding: 0 2rem;
   height: 64px;
   background: #0f172a;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -194,13 +242,12 @@ const SearchForm = styled.form`
   display: flex;
   align-items: center;
   background: #1e293b;
-  border: 1px solid #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
   overflow: hidden;
   transition: border-color 0.15s;
-
   &:focus-within {
-    border-color: #93c5fd;
+    border-color: #3b82f6;
   }
 `;
 
@@ -213,9 +260,8 @@ const SearchInput = styled.input`
   outline: none;
   font-size: 14px;
   color: #f1f5f9;
-
   &::placeholder {
-    color: #94a3b8;
+    color: #475569;
   }
 `;
 
@@ -227,12 +273,11 @@ const SearchButton = styled.button`
   width: 38px;
   background: transparent;
   border: none;
-  color: #64748b;
+  color: #475569;
   cursor: pointer;
   transition: color 0.15s;
-
   &:hover {
-    color: #1d4ed8;
+    color: #93c5fd;
   }
 `;
 
@@ -240,7 +285,11 @@ const CartWrapper = styled.div`
   position: relative;
   display: inline-flex;
   align-items: center;
-  color: #f1f5f9;
+  color: #94a3b8;
+  transition: color 0.15s;
+  &:hover {
+    color: #f1f5f9;
+  }
 `;
 
 const CartBadge = styled.span`
@@ -249,107 +298,109 @@ const CartBadge = styled.span`
   right: -8px;
   background: #1d4ed8;
   color: white;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  min-width: 18px;
-  height: 18px;
+  min-width: 17px;
+  height: 17px;
   border-radius: 999px;
   display: flex;
   align-items: center;
   justify-content: center;
+  border: 2px solid #0f172a;
 `;
 
 const Links = styled.div`
   display: flex;
   align-items: center;
-  gap: 1.25rem;
+  gap: 1rem;
   margin-left: auto;
-
   a {
     font-size: 14px;
     font-weight: 500;
-    color: #cbd5e1;
+    color: #94a3b8;
     text-decoration: none;
-
+    transition: color 0.15s;
     &:hover {
-      color: #1d4ed8;
+      color: #f1f5f9;
     }
   }
 `;
 
-const BellWrapper = styled.div`
+const IconBtn = styled.div`
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   border-radius: 8px;
-  color: #cbd5e1;
+  color: #94a3b8;
   cursor: pointer;
   transition:
     background 0.15s,
     color 0.15s;
-
   &:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: #f8fafc;
+    background: rgba(255, 255, 255, 0.07);
+    color: #f1f5f9;
   }
 `;
 
-const BellBadge = styled.span`
+const IconBadge = styled.span`
   position: absolute;
-  top: 2px;
-  right: 2px;
+  top: 1px;
+  right: 1px;
   background: #dc2626;
   color: white;
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 700;
-  min-width: 16px;
-  height: 16px;
+  min-width: 15px;
+  height: 15px;
   border-radius: 999px;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0 3px;
+  border: 1.5px solid #0f172a;
 `;
 
 const LogoutBtn = styled.div`
   font-size: 14px;
   font-weight: 500;
-  color: #fca5a5;
+  color: #f87171;
   cursor: pointer;
-
+  transition: opacity 0.15s;
   &:hover {
-    opacity: 0.8;
+    opacity: 0.75;
   }
 `;
 
 const UserGreeting = styled.span`
   font-size: 14px;
   font-weight: 500;
-  color: #f8fafc;
+  color: #cbd5e1;
 `;
 
 const AuthLinks = styled.div`
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 10px;
   margin-left: auto;
-
   a {
     font-size: 14px;
     font-weight: 500;
-    color: #cbd5e1;
+    color: #94a3b8;
     text-decoration: none;
-
+    transition: color 0.15s;
+    &:hover {
+      color: #f1f5f9;
+    }
     &:last-child {
       background: #1d4ed8;
       color: white;
       padding: 6px 14px;
       border-radius: 8px;
-
       &:hover {
+        color: white;
         opacity: 0.88;
       }
     }

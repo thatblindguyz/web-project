@@ -18,7 +18,7 @@ const Widget = ({ data }) => {
 
       <BottomRow>
         <LastMonth>
-          Số liệu tháng trước:{" "}
+          Số liệu tháng trước:{" "}
           {data.isMoney
             ? (data.lastMonth || 0).toLocaleString("vi-VN") + "₫"
             : (data.lastMonth || 0).toLocaleString()}

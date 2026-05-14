@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 const ProductPage = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
+  const [selectedImage, setSelectedImage] = useState("");
   const dispatch = useDispatch();
   const auth = useSelector((state) => state.auth);
   const navigate = useNavigate();
@@ -19,6 +20,8 @@ const ProductPage = () => {
       try {
         const res = await axios.get(`${url}/products/find/${id}`);
         setProduct(res.data);
+
+        setSelectedImage(res.data.image);
       } catch (err) {
         console.log(err);
       }
@@ -35,11 +38,28 @@ const ProductPage = () => {
 
   return (
     <Wrapper>
-      <BackButton onClick={() => navigate("/")}>← Trở về trang chủ</BackButton>
+      <BackButton onClick={() => navigate("/")}>
+        ← Quay lại trang chủ
+      </BackButton>
       <Card>
         {/* ẢNH */}
         <ImageContainer>
-          <img src={product.image} alt={product.name} />
+          <MainImage src={selectedImage} alt={product.name} />
+
+          <ThumbnailRow>
+            {(product.images?.length > 0
+              ? product.images
+              : [product.image]
+            ).map((img, index) => (
+              <Thumbnail
+                key={index}
+                src={img}
+                alt=""
+                $active={selectedImage === img}
+                onClick={() => setSelectedImage(img)}
+              />
+            ))}
+          </ThumbnailRow>
         </ImageContainer>
 
         <Divider />
@@ -131,15 +151,48 @@ const Card = styled.div`
 const ImageContainer = styled.div`
   flex-shrink: 0;
   width: 260px;
-  img {
-    width: 100%;
-    aspect-ratio: 1;
-    object-fit: cover;
-    border-radius: 8px;
-    border: 1px solid #e2e8f0;
-  }
   @media (max-width: 600px) {
     width: 100%;
+  }
+`;
+
+const MainImage = styled.img`
+  width: 100%;
+
+  aspect-ratio: 1;
+
+  object-fit: cover;
+
+  border-radius: 8px;
+
+  border: 1px solid #e2e8f0;
+`;
+
+const ThumbnailRow = styled.div`
+  display: flex;
+
+  gap: 8px;
+
+  margin-top: 10px;
+`;
+
+const Thumbnail = styled.img`
+  width: 70px;
+
+  height: 70px;
+
+  object-fit: cover;
+
+  border-radius: 8px;
+
+  cursor: pointer;
+
+  border: 2px solid ${(p) => (p.$active ? "#2563eb" : "#e2e8f0")};
+
+  transition: 0.15s;
+
+  &:hover {
+    border-color: #93c5fd;
   }
 `;
 

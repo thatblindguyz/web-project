@@ -11,6 +11,7 @@ import Widget from "./widgets/Widget";
 import Chart from "./widgets/Chart";
 import RecentTransaction from "./widgets/RecentTransaction";
 import AllTimeData from "./widgets/AllTimeData";
+import TopProductChart from "./widgets/TopProductChart";
 
 import { useNavigate } from "react-router-dom";
 
@@ -129,7 +130,7 @@ const Summary = () => {
         {/* ===== OVERVIEW ===== */}
         <Overview>
           <OverviewHeader>
-            <OverviewTitle>Tổng quan</OverviewTitle>
+            <OverviewTitle>Tổng quan</OverviewTitle>
             <OverviewSub>
               {" "}
               Nhấn vào Người dùng hoặc Đơn hàng để xem chi tiết.
@@ -151,6 +152,7 @@ const Summary = () => {
 
         {/* ===== CHART ===== */}
         <ChartWrapper>
+          <TopProductChart />
           <Chart />
         </ChartWrapper>
       </MainStats>

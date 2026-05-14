@@ -10,23 +10,32 @@ const router = express.Router();
 ============================ */
 
 router.post("/", isAdmin, async (req, res) => {
-  const { code, name, category, shortDesc, desc, price, image, quantity } =
-    req.body;
+  const {
+    code,
+    name,
+    category,
+    shortDesc,
+    desc,
+    price,
+    image,
+    images,
+    quantity,
+  } = req.body;
 
   try {
-    if (!image) {
-      return res.status(400).send("Image is required");
+    if (!images || images.length === 0) {
+      return res.status(400).send("Images are required");
     }
 
-    const uploadResponse = await cloudinary.uploader.upload(image, {
-      folder: "products",
-    });
+    const uploadedImages = await Promise.all(
+      images.map(async (img) => {
+        const result = await cloudinary.uploader.upload(img, {
+          folder: "products",
+        });
 
-    const existingCode = await Product.findOne({ code });
-
-    if (existingCode) {
-      return res.status(400).send("Product code already exists");
-    }
+        return result.secure_url;
+      }),
+    );
 
     const product = new Product({
       code,
@@ -36,7 +45,8 @@ router.post("/", isAdmin, async (req, res) => {
       desc,
       price,
       quantity,
-      image: uploadResponse.secure_url,
+      images: uploadedImages,
+      image: uploadedImages[0],
     });
 
     const savedProduct = await product.save();
@@ -119,6 +129,7 @@ router.put("/:id", isAdmin, async (req, res) => {
     desc,
     price,
     image,
+    images,
     quantity,
     isDiscount,
     discountPercent,
@@ -137,12 +148,24 @@ router.put("/:id", isAdmin, async (req, res) => {
       discountPercent,
     };
 
-    if (image && image.startsWith("data:image")) {
-      const uploadResponse = await cloudinary.uploader.upload(image, {
-        folder: "products",
-      });
+    if (images && images.length > 0) {
+      const uploadedImages = await Promise.all(
+        images.map(async (img) => {
+          if (img.startsWith("http")) {
+            return img;
+          }
 
-      updatedData.image = uploadResponse.secure_url;
+          const result = await cloudinary.uploader.upload(img, {
+            folder: "products",
+          });
+
+          return result.secure_url;
+        }),
+      );
+
+      updatedData.images = uploadedImages;
+
+      updatedData.image = image;
     }
 
     const updatedProduct = await Product.findByIdAndUpdate(

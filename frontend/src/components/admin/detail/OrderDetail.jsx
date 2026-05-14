@@ -70,28 +70,12 @@ const OrderDetail = () => {
       {/* ===== HEADER ===== */}
       <Header>
         <Left>
-          <BackButton onClick={() => navigate(-1)}>← Trở về</BackButton>
+          <BackButton onClick={() => navigate(-1)}>← Quay lại</BackButton>
           <div>
-            <PageTitle>Chi tiết đơn hàng </PageTitle>
+            <PageTitle>Chi tiết đơn hàng</PageTitle>
             <OrderId>#{order._id?.slice(-8).toUpperCase()}</OrderId>
           </div>
         </Left>
-        <BadgeRow>
-          <StatusBadge
-            $bg={deliveryStyle.bg}
-            $color={deliveryStyle.color}
-            $border={deliveryStyle.border}
-          >
-            {order.delivery_status || "—"}
-          </StatusBadge>
-          <StatusBadge
-            $bg={paymentStyle.bg}
-            $color={paymentStyle.color}
-            $border={paymentStyle.border}
-          >
-            {order.payment_status || "—"}
-          </StatusBadge>
-        </BadgeRow>
       </Header>
 
       {/* ===== TOP ROW: ORDER INFO + SHIPPING INFO SIDE BY SIDE ===== */}
@@ -130,7 +114,7 @@ const OrderDetail = () => {
               </Value>
             </Field>
             <Field>
-              <Label>Thông tin vận chuyển:</Label>
+              <Label>Thông tin vận chuyển:</Label>
               <Value>
                 <StatusBadge
                   $bg={deliveryStyle.bg}
@@ -146,7 +130,7 @@ const OrderDetail = () => {
 
         {/* SHIPPING INFO */}
         <Card>
-          <CardTitle>Thông tin vận chuyển</CardTitle>
+          <CardTitle>Thông tin vận chuyển</CardTitle>
           <FieldList>
             <Field>
               <Label>Tên:</Label>
@@ -157,11 +141,11 @@ const OrderDetail = () => {
               <Value>{order.shipping?.email || "—"}</Value>
             </Field>
             <Field>
-              <Label>Số điện thoại:</Label>
+              <Label>Số điện thoại:</Label>
               <Value>{order.shipping?.phone || "—"}</Value>
             </Field>
             <Field>
-              <Label>Địa chỉ:</Label>
+              <Label>Địa chỉ:</Label>
               <Value>
                 {order.shipping?.address?.line1 || "—"}
                 {order.shipping?.address?.line2 &&
@@ -169,7 +153,7 @@ const OrderDetail = () => {
               </Value>
             </Field>
             <Field>
-              <Label>Thành phố:</Label>
+              <Label>Thành phố:</Label>
               <Value>{order.shipping?.address?.city || "—"}</Value>
             </Field>
           </FieldList>
@@ -178,7 +162,7 @@ const OrderDetail = () => {
 
       {/* ===== PRODUCTS ===== */}
       <Card>
-        <CardTitle>Sản phẩm</CardTitle>
+        <CardTitle>Sản phẩm</CardTitle>
         <ProductList>
           {order.products?.map((item, index) => (
             <ProductRow key={index}>
@@ -273,12 +257,6 @@ const OrderId = styled.span`
   color: #475569;
   font-weight: 500;
   letter-spacing: 0.05em;
-`;
-
-const BadgeRow = styled.div`
-  display: flex;
-  gap: 8px;
-  align-items: center;
 `;
 
 const StatusBadge = styled.span`

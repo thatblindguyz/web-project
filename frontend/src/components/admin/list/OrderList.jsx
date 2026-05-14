@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { DataGrid } from "@mui/x-data-grid";
 import Paper from "@mui/material/Paper";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { fetchOrders } from "../../../features/order/OrderSlice";
@@ -45,41 +45,61 @@ const getPaymentStyle = (status = "") =>
    COMPONENT
 ============================ */
 const OrderList = () => {
+  const [confirmModal, setConfirmModal] = useState(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { items: orders } = useSelector((state) => state.orders);
 
-  const updateStatus = async (id, status) => {
-    const confirmAction = window.confirm(
-      `Are you sure to set this order to ${status}?`,
-    );
-
-    if (!confirmAction) return;
-
+  const handleConfirm = async () => {
+    const { id, type } = confirmModal;
     try {
-      await axios.put(`${url}/orders/delivery/${id}`, { status }, setHeaders());
-
-      // reload data
+      if (type === "pay") {
+        await axios.put(`${url}/orders/${id}/pay`, {}, setHeaders());
+      } else {
+        await axios.put(
+          `${url}/orders/delivery/${id}`,
+          { status: type },
+          setHeaders(),
+        );
+      }
       dispatch(fetchOrders());
     } catch (err) {
       console.log(err);
     }
+    setConfirmModal(null);
   };
+
+  // const updateStatus = async (id, status) => {
+  //   const confirmAction = window.confirm(
+  //     `Are you sure to set this order to ${status}?`,
+  //   );
+
+  //   if (!confirmAction) return;
+
+  //   try {
+  //     await axios.put(`${url}/orders/delivery/${id}`, { status }, setHeaders());
+
+  //     // reload data
+  //     dispatch(fetchOrders());
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // };
 
   //update payment status
-  const updatePaymentStatus = async (id) => {
-    const confirmAction = window.confirm("Xác nhận đơn hàng đã thanh toán?");
+  // const updatePaymentStatus = async (id) => {
+  //   const confirmAction = window.confirm("Xác nhận đơn hàng đã thanh toán?");
 
-    if (!confirmAction) return;
+  //   if (!confirmAction) return;
 
-    try {
-      await axios.put(`${url}/orders/${id}/pay`, {}, setHeaders());
+  //   try {
+  //     await axios.put(`${url}/orders/${id}/pay`, {}, setHeaders());
 
-      dispatch(fetchOrders());
-    } catch (err) {
-      console.log(err);
-    }
-  };
+  //     dispatch(fetchOrders());
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // };
 
   /* ================= FETCH ORDERS ================= */
   useEffect(() => {
@@ -91,9 +111,27 @@ const OrderList = () => {
     {
       field: "_id",
       headerName: "Mã đơn",
-      width: 220,
+      width: 150,
       renderCell: (params) => (
         <OrderId>#{params.row._id?.slice(-8).toUpperCase()}</OrderId>
+      ),
+    },
+
+    {
+      field: "createdAt",
+      headerName: "Ngày tạo",
+      width: 170,
+
+      renderCell: (params) => (
+        <DateText>
+          {new Date(params.row.createdAt).toLocaleString("vi-VN", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+        </DateText>
       ),
     },
 
@@ -165,7 +203,11 @@ const OrderList = () => {
               (params.row.paymentMethod === "manual" ||
                 params.row.paymentMethod === "stripe") &&
               status === "pending" && (
-                <PayBtn onClick={() => updatePaymentStatus(params.row._id)}>
+                <PayBtn
+                  onClick={() =>
+                    setConfirmModal({ id: params.row._id, type: "pay" })
+                  }
+                >
                   Xác nhận TT
                 </PayBtn>
               )}
@@ -190,7 +232,9 @@ const OrderList = () => {
             params.row.delivery_status !== "delivered" &&
             params.row.delivery_status !== "cancelled" && (
               <ActionBtn
-                onClick={() => updateStatus(params.row._id, "delivering")}
+                onClick={() =>
+                  setConfirmModal({ id: params.row._id, type: "delivering" })
+                }
               >
                 Giao hàng
               </ActionBtn>
@@ -201,7 +245,9 @@ const OrderList = () => {
           {params.row.delivery_status !== "delivered" &&
             params.row.delivery_status !== "cancelled" && (
               <ActionBtnGreen
-                onClick={() => updateStatus(params.row._id, "delivered")}
+                onClick={() =>
+                  setConfirmModal({ id: params.row._id, type: "delivered" })
+                }
               >
                 Hoàn thành
               </ActionBtnGreen>
@@ -213,56 +259,84 @@ const OrderList = () => {
 
   /* ================= TABLE ================= */
   return (
-    <Paper
-      elevation={0}
-      sx={{
-        height: 500,
-        width: "100%",
-        border: "1px solid #E2E8F0",
-        borderRadius: "12px",
-        overflow: "hidden",
-      }}
-    >
-      <DataGrid
-        rows={orders}
-        columns={columns}
-        getRowId={(row) => row._id}
-        pageSizeOptions={[5, 10]}
+    <>
+      <Paper
+        elevation={0}
         sx={{
-          border: 0,
-          fontFamily: "inherit",
-          "& .MuiDataGrid-columnHeaders": {
-            backgroundColor: "#F8FAFC",
-            borderBottom: "1px solid #E2E8F0",
-          },
-          "& .MuiDataGrid-columnHeaderTitle": {
-            fontSize: "15px",
-            fontWeight: 600,
-            color: "#64748B",
-            textTransform: "uppercase",
-            letterSpacing: "0.05em",
-          },
-          "& .MuiDataGrid-cell": {
-            display: "flex",
-            alignItems: "center",
-            borderBottom: "1px solid #F1F5F9",
-            fontSize: "17px",
-          },
-          "& .MuiDataGrid-row:hover": {
-            backgroundColor: "#F8FAFC",
-          },
-          "& .MuiDataGrid-row:last-child .MuiDataGrid-cell": {
-            borderBottom: 0,
-          },
-          "& .MuiCheckbox-root": {
-            color: "#CBD5E1",
-          },
-          "& .MuiCheckbox-root.Mui-checked": {
-            color: "#1D4ED8",
-          },
+          height: 500,
+          width: "100%",
+          border: "1px solid #E2E8F0",
+          borderRadius: "12px",
+          overflow: "hidden",
         }}
-      />
-    </Paper>
+      >
+        <DataGrid
+          rows={orders}
+          columns={columns}
+          getRowId={(row) => row._id}
+          pageSizeOptions={[5, 10]}
+          sx={{
+            border: 0,
+            fontFamily: "inherit",
+            "& .MuiDataGrid-columnHeaders": {
+              backgroundColor: "#F8FAFC",
+              borderBottom: "1px solid #E2E8F0",
+            },
+            "& .MuiDataGrid-columnHeaderTitle": {
+              fontSize: "15px",
+              fontWeight: 600,
+              color: "#64748B",
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+            },
+            "& .MuiDataGrid-cell": {
+              display: "flex",
+              alignItems: "center",
+              borderBottom: "1px solid #F1F5F9",
+              fontSize: "17px",
+            },
+            "& .MuiDataGrid-row:hover": {
+              backgroundColor: "#F8FAFC",
+            },
+            "& .MuiDataGrid-row:last-child .MuiDataGrid-cell": {
+              borderBottom: 0,
+            },
+            "& .MuiCheckbox-root": {
+              color: "#CBD5E1",
+            },
+            "& .MuiCheckbox-root.Mui-checked": {
+              color: "#1D4ED8",
+            },
+          }}
+        />
+      </Paper>
+      {confirmModal && (
+        <ModalOverlay>
+          <ModalBox>
+            <ModalTitle>
+              {confirmModal.type === "delivering"
+                ? "Xác nhận giao hàng"
+                : confirmModal.type === "delivered"
+                  ? "Hoàn thành đơn hàng"
+                  : "Xác nhận thanh toán"}
+            </ModalTitle>
+            <ModalText>
+              {confirmModal.type === "delivering"
+                ? "Xác nhận chuyển đơn hàng sang trạng thái đang giao?"
+                : confirmModal.type === "delivered"
+                  ? "Xác nhận đơn hàng đã giao thành công?"
+                  : "Xác nhận đơn hàng này đã được thanh toán?"}
+            </ModalText>
+            <ModalActions>
+              <ModalCancel onClick={() => setConfirmModal(null)}>
+                Quay lại
+              </ModalCancel>
+              <ModalConfirm onClick={handleConfirm}>Xác nhận</ModalConfirm>
+            </ModalActions>
+          </ModalBox>
+        </ModalOverlay>
+      )}
+    </>
   );
 };
 
@@ -280,6 +354,12 @@ const Amount = styled.span`
   font-size: 17px;
   font-weight: 600;
   color: #1e293b;
+`;
+
+const DateText = styled.span`
+  font-size: 14px;
+  color: #475569;
+  font-weight: 500;
 `;
 
 const StatusBadge = styled.span`
@@ -371,24 +451,89 @@ const PayBtn = styled.button`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
   height: 28px;
   padding: 0 10px;
-
-  border: none;
+  border: 0.5px solid #a5b4fc;
   border-radius: 6px;
-
-  background: #16a34a;
-  color: white;
-
+  background: #eef2ff;
+  color: #3730a3;
   font-size: 11px;
   font-weight: 600;
-
   cursor: pointer;
-
   transition: opacity 0.15s;
-
   &:hover {
     opacity: 0.88;
+  }
+`;
+
+const ModalOverlay = styled.div`
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+`;
+
+const ModalBox = styled.div`
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+const ModalTitle = styled.h3`
+  font-size: 16px;
+  font-weight: 700;
+  color: #1e293b;
+`;
+
+const ModalText = styled.p`
+  font-size: 14px;
+  color: #475569;
+`;
+
+const ModalActions = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+`;
+
+const ModalCancel = styled.button`
+  padding: 0 14px;
+  height: 32px;
+  background: #f8fafc;
+  color: #475569;
+  border: 0.5px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  &:hover {
+    opacity: 0.82;
+  }
+`;
+
+const ModalConfirm = styled.button`
+  padding: 0 14px;
+  height: 32px;
+  background: #1e293b;
+  color: #f8fafc;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  &:hover {
+    opacity: 0.82;
   }
 `;

@@ -18,7 +18,7 @@ const Dashboard = () => {
           }
           to="/admin/summary"
         >
-          <FaTachometerAlt /> Summary
+          <FaTachometerAlt /> Tổng quan
         </NavLink>
         <NavLink
           className={({ isActive }) =>
@@ -26,7 +26,7 @@ const Dashboard = () => {
           }
           to="/admin/products"
         >
-          <FaStore /> Products
+          <FaStore /> Sản phẩm
         </NavLink>
         <NavLink
           className={({ isActive }) =>
@@ -34,7 +34,7 @@ const Dashboard = () => {
           }
           to="/admin/orders"
         >
-          <FaClipboard /> Orders
+          <FaClipboard /> Đơn hàng
         </NavLink>
         <NavLink
           className={({ isActive }) =>
@@ -42,7 +42,7 @@ const Dashboard = () => {
           }
           to="/admin/users"
         >
-          <FaUsers /> Users
+          <FaUsers /> Người dùng
         </NavLink>
       </SideNav>
 

@@ -12,7 +12,6 @@ const CreateProduct = () => {
   const navigate = useNavigate();
   const { createStatus } = useSelector((state) => state.products);
 
-  const [productImg, setProductImg] = useState("");
   const [category, setCategory] = useState("");
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
@@ -21,22 +20,43 @@ const CreateProduct = () => {
   const [priceError, setPriceError] = useState("");
   const [code, setCode] = useState("");
   const [quantity, setQuantity] = useState("");
+  const [productImages, setProductImages] = useState([]);
+  const [selectedImage, setSelectedImage] = useState(0);
 
   /* ================= IMAGE UPLOAD ================= */
-  const handleProductImageUpload = (e) => {
-    const file = e.target.files[0];
-    TransformFileData(file);
+  const handleProductImageUpload = async (e) => {
+    const files = Array.from(e.target.files);
+
+    const base64Images = [];
+
+    for (let file of files) {
+      const reader = new FileReader();
+
+      const promise = new Promise((resolve) => {
+        reader.onloadend = () => {
+          resolve(reader.result);
+        };
+      });
+
+      reader.readAsDataURL(file);
+
+      const result = await promise;
+
+      base64Images.push(result);
+    }
+
+    setProductImages(base64Images);
   };
 
-  const TransformFileData = (file) => {
-    const reader = new FileReader();
-    if (file) {
-      reader.readAsDataURL(file);
-      reader.onloadend = () => setProductImg(reader.result);
-    } else {
-      setProductImg("");
-    }
-  };
+  // const TransformFileData = (file) => {
+  //   const reader = new FileReader();
+  //   if (file) {
+  //     reader.readAsDataURL(file);
+  //     reader.onloadend = () => setProductImg(reader.result);
+  //   } else {
+  //     setProductImg("");
+  //   }
+  // };
 
   /* ================= SUBMIT ================= */
   const handleSubmit = (e) => {
@@ -58,7 +78,9 @@ const CreateProduct = () => {
         shortDesc,
         desc,
         quantity,
-        image: productImg,
+        image: productImages[selectedImage],
+
+        images: productImages,
       }),
     );
 
@@ -69,7 +91,7 @@ const CreateProduct = () => {
     setPrice("");
     setDesc("");
     setShortDesc("");
-    setProductImg("");
+    setProductImages([]);
     setQuantity("");
   };
 
@@ -78,7 +100,7 @@ const CreateProduct = () => {
     <Wrapper>
       <Header>
         <Left>
-          <BackButton onClick={() => navigate(-1)}>← Back</BackButton>
+          <BackButton onClick={() => navigate(-1)}>← Quay lại</BackButton>
           <PageTitle>Create Product</PageTitle>
         </Left>
       </Header>
@@ -93,6 +115,7 @@ const CreateProduct = () => {
               <FileInput
                 accept="image/*"
                 type="file"
+                multiple
                 onChange={handleProductImageUpload}
                 required
               />
@@ -192,8 +215,22 @@ const CreateProduct = () => {
         <Card>
           <CardTitle>Image Preview</CardTitle>
           <ImagePreview>
-            {productImg ? (
-              <img src={productImg} alt="preview" />
+            {productImages.length > 0 ? (
+              <PreviewGrid>
+                {productImages.map((img, index) => (
+                  <PreviewItem
+                    key={index}
+                    $active={selectedImage === index}
+                    onClick={() => setSelectedImage(index)}
+                  >
+                    <img src={img} alt="" />
+
+                    {selectedImage === index && (
+                      <SelectedBadge>Ảnh đại diện</SelectedBadge>
+                    )}
+                  </PreviewItem>
+                ))}
+              </PreviewGrid>
             ) : (
               <Placeholder>
                 <PlaceholderIcon>🖼</PlaceholderIcon>
@@ -454,4 +491,62 @@ const Placeholder = styled.div`
 const PlaceholderIcon = styled.span`
   font-size: 32px;
   opacity: 0.4;
+`;
+
+const PreviewGrid = styled.div`
+  display: grid;
+
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+
+  gap: 10px;
+
+  width: 100%;
+
+  img {
+    width: 100%;
+    height: 100px;
+
+    object-fit: cover;
+
+    border-radius: 8px;
+
+    border: 1px solid #e2e8f0;
+  }
+`;
+
+const PreviewItem = styled.div`
+  position: relative;
+
+  border-radius: 8px;
+
+  overflow: hidden;
+
+  cursor: pointer;
+
+  border: 2px solid ${(p) => (p.$active ? "#2563eb" : "#e2e8f0")};
+
+  img {
+    width: 100%;
+    height: 100px;
+
+    object-fit: cover;
+  }
+`;
+
+const SelectedBadge = styled.div`
+  position: absolute;
+
+  bottom: 6px;
+  left: 6px;
+
+  background: #2563eb;
+
+  color: white;
+
+  font-size: 11px;
+  font-weight: 600;
+
+  padding: 3px 6px;
+
+  border-radius: 4px;
 `;

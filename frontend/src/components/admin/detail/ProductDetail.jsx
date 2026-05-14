@@ -11,6 +11,7 @@ const ProductDetail = () => {
   const params = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState({});
+  const [selectedImage, setSelectedImage] = useState("");
   const [loading, setLoading] = useState(true);
 
   /* ================= FETCH PRODUCT ================= */
@@ -19,6 +20,8 @@ const ProductDetail = () => {
       try {
         const res = await axios.get(`${url}/products/find/${params.id}`);
         setProduct(res.data);
+
+        setSelectedImage(res.data.images?.[0] || res.data.image);
         setLoading(false);
       } catch (err) {
         console.log(err.response?.data);
@@ -37,7 +40,7 @@ const ProductDetail = () => {
       {/* ===== HEADER ===== */}
       <Header>
         <Left>
-          <BackButton onClick={() => navigate(-1)}>← Back</BackButton>
+          <BackButton onClick={() => navigate(-1)}>← Quay lại</BackButton>
           <PageTitle>Product Detail</PageTitle>
         </Left>
         <CodeBadge>#{product.code}</CodeBadge>
@@ -46,7 +49,21 @@ const ProductDetail = () => {
       {/* ===== MAIN CARD ===== */}
       <Card>
         <ImageContainer>
-          <img src={product.image} alt={product.name} />
+          <MainImage src={selectedImage || product.image} alt={product.name} />
+
+          {product.images?.length > 0 && (
+            <ThumbnailRow>
+              {product.images.map((img, index) => (
+                <Thumbnail
+                  key={index}
+                  src={img}
+                  alt=""
+                  $active={selectedImage === img}
+                  onClick={() => setSelectedImage(img)}
+                />
+              ))}
+            </ThumbnailRow>
+          )}
         </ImageContainer>
 
         <Divider />
@@ -184,16 +201,49 @@ const ImageContainer = styled.div`
   flex-shrink: 0;
   width: 220px;
 
-  img {
-    width: 100%;
-    aspect-ratio: 1;
-    object-fit: cover;
-    border-radius: 8px;
-    border: 1px solid #e2e8f0;
-  }
-
   @media (max-width: 600px) {
     width: 100%;
+  }
+`;
+
+const MainImage = styled.img`
+  width: 100%;
+  aspect-ratio: 1;
+
+  object-fit: cover;
+
+  border-radius: 8px;
+
+  border: 1px solid #e2e8f0;
+`;
+
+const ThumbnailRow = styled.div`
+  display: flex;
+  gap: 8px;
+
+  margin-top: 10px;
+
+  overflow-x: auto;
+`;
+
+const Thumbnail = styled.img`
+  width: 58px;
+  height: 58px;
+
+  object-fit: cover;
+
+  border-radius: 6px;
+
+  cursor: pointer;
+
+  flex-shrink: 0;
+
+  border: 2px solid ${(p) => (p.$active ? "#2563eb" : "#e2e8f0")};
+
+  transition: 0.15s;
+
+  &:hover {
+    border-color: #93c5fd;
   }
 `;
 

@@ -9,6 +9,7 @@ import {
   MenuItem,
 } from "@mui/material";
 
+import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { updateProduct } from "../../../features/product/ProductSlice";
 
@@ -27,17 +28,37 @@ const ProductEdit = ({ product }) => {
   const [price, setPrice] = React.useState(product.price);
   const [quantity, setQuantity] = React.useState(product.quantity);
   const [desc, setDesc] = React.useState(product.desc);
-  const [productImg, setProductImg] = React.useState(product.image);
+
+  const [selectedImage, setSelectedImage] = useState(0);
+  const [productImages, setProductImages] = React.useState(
+    product.images?.length > 0 ? product.images : [product.image],
+  );
 
   const handleClickOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onloadend = () => setProductImg(reader.result);
+  const handleImageUpload = async (e) => {
+    const files = Array.from(e.target.files);
+
+    const base64Images = [];
+
+    for (let file of files) {
+      const reader = new FileReader();
+
+      const promise = new Promise((resolve) => {
+        reader.onloadend = () => {
+          resolve(reader.result);
+        };
+      });
+
+      reader.readAsDataURL(file);
+
+      const result = await promise;
+
+      base64Images.push(result);
+    }
+
+    setProductImages(base64Images);
   };
 
   /* ── shared MUI TextField sx ── */
@@ -67,7 +88,8 @@ const ProductEdit = ({ product }) => {
         price,
         quantity,
         desc,
-        image: productImg,
+        image: productImages[selectedImage],
+        images: productImages,
         isDiscount,
         discountPercent,
       }),
@@ -79,7 +101,7 @@ const ProductEdit = ({ product }) => {
   return (
     <>
       {/* BUTTON */}
-      <EditButton onClick={handleClickOpen}>Edit</EditButton>
+      <EditButton onClick={handleClickOpen}>Chỉnh sửa</EditButton>
 
       {/* DIALOG */}
       <Dialog
@@ -113,16 +135,29 @@ const ProductEdit = ({ product }) => {
             <UploadLabel>
               <UploadInput
                 type="file"
+                multiple
                 accept="image/*"
                 onChange={handleImageUpload}
               />
               Choose Image
             </UploadLabel>
 
-            {productImg && (
-              <ImagePreview>
-                <img src={productImg} alt="preview" />
-              </ImagePreview>
+            {productImages.length > 0 && (
+              <PreviewGrid>
+                {productImages.map((img, index) => (
+                  <PreviewItem
+                    key={index}
+                    $active={selectedImage === index}
+                    onClick={() => setSelectedImage(index)}
+                  >
+                    <img src={img} alt="" />
+
+                    {selectedImage === index && (
+                      <SelectedBadge>Ảnh đại diện</SelectedBadge>
+                    )}
+                  </PreviewItem>
+                ))}
+              </PreviewGrid>
             )}
 
             {/* CODE */}
@@ -319,14 +354,35 @@ const UploadInput = styled.input`
   display: none;
 `;
 
-const ImagePreview = styled.div`
+// const ImagePreview = styled.div`
+//   margin-bottom: 14px;
+
+//   img {
+//     width: 80px;
+//     height: 80px;
+//     object-fit: cover;
+//     border-radius: 8px;
+//     border: 1px solid #e2e8f0;
+//   }
+// `;
+
+const PreviewGrid = styled.div`
+  display: grid;
+
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+
+  gap: 10px;
+
   margin-bottom: 14px;
 
   img {
-    width: 80px;
+    width: 100%;
     height: 80px;
+
     object-fit: cover;
+
     border-radius: 8px;
+
     border: 1px solid #e2e8f0;
   }
 `;
@@ -395,4 +451,42 @@ const DiscountLabel = styled.label`
   font-weight: 500;
   color: #1e293b;
   cursor: pointer;
+`;
+
+const PreviewItem = styled.div`
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid ${(p) => (p.$active ? "#1d4ed8" : "#e2e8f0")};
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+  box-shadow: ${(p) => (p.$active ? "0 0 0 3px rgba(29,78,216,0.12)" : "none")};
+
+  &:hover {
+    border-color: ${(p) => (p.$active ? "#1d4ed8" : "#93c5fd")};
+  }
+
+  img {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+    display: block;
+  }
+`;
+
+const SelectedBadge = styled.div`
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(29, 78, 216, 0.85);
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 0;
+  text-align: center;
+  letter-spacing: 0.03em;
+  backdrop-filter: blur(2px);
 `;

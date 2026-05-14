@@ -3,12 +3,18 @@ import { useDispatch, useSelector } from "react-redux";
 import { addToCart, getTotals } from "../../../features/cart/CartSlice";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import styled from "styled-components";
+import { useEffect, useState } from "react";
 
 const Home = () => {
   const { data, error, isLoading } = useGetProductsQuery();
   const [searchParams] = useSearchParams();
   const search = searchParams.get("search") || "";
   const auth = useSelector((state) => state.auth);
+  const [showBanner, setShowBanner] = useState(false);
+
+  useEffect(() => {
+    setShowBanner(true);
+  }, []);
 
   const filteredProducts = data?.filter((product) =>
     product.name.toLowerCase().includes(search.toLowerCase()),
@@ -23,70 +29,131 @@ const Home = () => {
   };
 
   return (
-    <Wrapper>
-      {isLoading ? (
-        <StatusText>Loading...</StatusText>
-      ) : error ? (
-        <StatusText>Error loading products.</StatusText>
-      ) : (
-        <>
-          <PageTitle>New Arrival</PageTitle>
-
-          <ProductGrid>
-            {filteredProducts?.map((product) => (
-              <ProductCard
-                key={product._id}
-                onClick={() => navigate(`/product/${product._id}`)}
+    <>
+      {/* banner */}
+      {showBanner && (
+        <BannerOverlay>
+          <BannerBox>
+            <CloseBtn onClick={() => setShowBanner(false)}>
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               >
-                <ProductImg src={product.image} alt={product.name} />
-                <ProductTitle>{product.name}</ProductTitle>
-                <PriceBlock>
-                  {product.isDiscount && product.discountPercent > 0 ? (
-                    <>
-                      <NewPrice>
-                        $
-                        {(
-                          product.price *
-                          (1 - product.discountPercent / 100)
-                        ).toLocaleString("vi-VN")}
-                        ₫
-                      </NewPrice>
-                      <OldPriceRow>
-                        <OldPrice>
-                          {product.price?.toLocaleString("vi-VN")}₫
-                        </OldPrice>
-                        <DiscountBadge>
-                          -{product.discountPercent}%
-                        </DiscountBadge>
-                      </OldPriceRow>
-                    </>
-                  ) : (
-                    <Price>{product.price?.toLocaleString("vi-VN")}₫</Price>
-                  )}
-                </PriceBlock>
-                <Stock
-                  $out={product.quantity === 0}
-                  $low={product.quantity <= 3 && product.quantity > 0}
-                >
-                  {product.quantity === 0
-                    ? "Out of Stock"
-                    : `Stock: ${product.quantity}`}
-                </Stock>
-                <AddButton
-                  disabled={product.quantity === 0}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleAddToCart(product);
-                  }}
-                >
-                  {product.quantity === 0 ? "Out of Stock" : "Add to Cart"}
-                </AddButton>
-              </ProductCard>
-            ))}
-          </ProductGrid>
-        </>
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </CloseBtn>
+
+            <BannerImageWrap>
+              <BannerImage
+                src="https://images.unsplash.com/photo-1591488320449-011701bb6704?w=800&q=80"
+                alt="PC components"
+              />
+              <BannerImageOverlay />
+              <BannerTag>Flash Sale</BannerTag>
+            </BannerImageWrap>
+
+            <BannerContent>
+              <BannerTitle>Linh kiện máy tính</BannerTitle>
+              <BannerText>
+                Giảm đến <strong>30%</strong> cho CPU, RAM, VGA và ổ cứng. Số
+                lượng có hạn — ưu tiên đặt trước.
+              </BannerText>
+
+              <StatsRow>
+                <StatCard>
+                  <StatNum>30%</StatNum>
+                  <StatLabel>Giảm tối đa</StatLabel>
+                </StatCard>
+                <StatCard>
+                  <StatNum>50+</StatNum>
+                  <StatLabel>Sản phẩm</StatLabel>
+                </StatCard>
+                <StatCard>
+                  <StatNum>24h</StatNum>
+                  <StatLabel>Còn lại</StatLabel>
+                </StatCard>
+              </StatsRow>
+
+              <BannerButton onClick={() => setShowBanner(false)}>
+                Mua ngay
+              </BannerButton>
+            </BannerContent>
+          </BannerBox>
+        </BannerOverlay>
       )}
-    </Wrapper>
+
+      <Wrapper>
+        {isLoading ? (
+          <StatusText>Loading...</StatusText>
+        ) : error ? (
+          <StatusText>Error loading products.</StatusText>
+        ) : (
+          <>
+            <PageTitle>New Arrival</PageTitle>
+
+            <ProductGrid>
+              {filteredProducts?.map((product) => (
+                <ProductCard
+                  key={product._id}
+                  onClick={() => navigate(`/product/${product._id}`)}
+                >
+                  <ProductImg src={product.image} alt={product.name} />
+                  <ProductTitle>{product.name}</ProductTitle>
+                  <PriceBlock>
+                    {product.isDiscount && product.discountPercent > 0 ? (
+                      <>
+                        <NewPrice>
+                          $
+                          {(
+                            product.price *
+                            (1 - product.discountPercent / 100)
+                          ).toLocaleString("vi-VN")}
+                          ₫
+                        </NewPrice>
+                        <OldPriceRow>
+                          <OldPrice>
+                            {product.price?.toLocaleString("vi-VN")}₫
+                          </OldPrice>
+                          <DiscountBadge>
+                            -{product.discountPercent}%
+                          </DiscountBadge>
+                        </OldPriceRow>
+                      </>
+                    ) : (
+                      <Price>{product.price?.toLocaleString("vi-VN")}₫</Price>
+                    )}
+                  </PriceBlock>
+                  <Stock
+                    $out={product.quantity === 0}
+                    $low={product.quantity <= 3 && product.quantity > 0}
+                  >
+                    {product.quantity === 0
+                      ? "Out of Stock"
+                      : `Stock: ${product.quantity}`}
+                  </Stock>
+                  <AddButton
+                    disabled={product.quantity === 0}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAddToCart(product);
+                    }}
+                  >
+                    {product.quantity === 0 ? "Out of Stock" : "Add to Cart"}
+                  </AddButton>
+                </ProductCard>
+              ))}
+            </ProductGrid>
+          </>
+        )}
+      </Wrapper>
+    </>
   );
 };
 
@@ -216,4 +283,160 @@ const DiscountBadge = styled.span`
   background: #fef2f2;
   border-radius: 4px;
   padding: 1px 5px;
+`;
+
+const BannerOverlay = styled.div`
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  padding: 1rem;
+`;
+
+const BannerBox = styled.div`
+  width: 92%;
+  max-width: 460px;
+  background: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  position: relative;
+  animation: popup 0.25s ease;
+
+  @keyframes popup {
+    from {
+      opacity: 0;
+      transform: scale(0.92);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+`;
+
+const CloseBtn = styled.button`
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.25);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  transition: background 0.15s;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.4);
+  }
+`;
+
+const BannerImageWrap = styled.div`
+  position: relative;
+  height: 200px;
+  background: #0f172a;
+  overflow: hidden;
+`;
+
+const BannerImage = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.7;
+`;
+
+const BannerImageOverlay = styled.div`
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 40%, #0f172a 100%);
+`;
+
+const BannerTag = styled.div`
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  background: #1d4ed8;
+  color: #bfdbfe;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 6px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+`;
+
+const BannerContent = styled.div`
+  padding: 1.25rem 1.5rem 1.5rem;
+`;
+
+const BannerTitle = styled.h2`
+  font-size: 22px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 6px;
+`;
+
+const BannerText = styled.p`
+  font-size: 14px;
+  color: #475569;
+  line-height: 1.6;
+  margin: 0 0 16px;
+
+  strong {
+    color: #0f172a;
+  }
+`;
+
+const StatsRow = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 16px;
+`;
+
+const StatCard = styled.div`
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 10px 12px;
+  text-align: center;
+  border: 1px solid #f1f5f9;
+`;
+
+const StatNum = styled.p`
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+`;
+
+const StatLabel = styled.p`
+  font-size: 11px;
+  color: #64748b;
+  margin: 2px 0 0;
+`;
+
+const BannerButton = styled.button`
+  width: 100%;
+  height: 44px;
+  border: none;
+  border-radius: 8px;
+  background: #1e293b;
+  color: #f8fafc;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+
+  &:hover {
+    opacity: 0.88;
+  }
 `;

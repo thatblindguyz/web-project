@@ -36,20 +36,20 @@ const Transactions = () => {
 
   return (
     <StyledTransactions>
-      <TableTitle>Các Giao Dịch Gần Đây</TableTitle>
+      <TableTitle>Các giao dịch gần đây</TableTitle>
 
       {isLoading ? (
         <LoadingRow>
           <Spinner />
-          <span>Fetching transactions...</span>
+          <span>Đang lấy dữ liệu giao dịch...</span>
         </LoadingRow>
       ) : (
         <>
           <TransactionHeader>
             <p>Ngày</p>
-            <p>Số Tiền</p>
-            <p>Giao Hàng</p>
-            <p>Thanh Toán</p>
+            <p>Số tiền</p>
+            <p>Giao hàng</p>
+            <p>Thanh toán</p>
           </TransactionHeader>
 
           {orders?.map((order, index) => (
@@ -72,7 +72,7 @@ const Transactions = () => {
           ))}
 
           {orders.length === 0 && (
-            <EmptyState>No transactions found.</EmptyState>
+            <EmptyState>Không tìm thấy giao dịch nào.</EmptyState>
           )}
         </>
       )}
@@ -93,7 +93,7 @@ const spin = keyframes`
   to { transform: rotate(360deg); }
 `;
 
-const COLS = "0.7fr 1fr 1.1fr 1.1fr";
+const COLS = "0.9fr 1.2fr 1.4fr 1.1fr";
 
 const StyledTransactions = styled.div`
   background: #ffffff;

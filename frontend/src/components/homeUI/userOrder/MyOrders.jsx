@@ -73,10 +73,10 @@ const MyOrders = () => {
 
   return (
     <Wrapper>
-      <PageTitle>My Orders</PageTitle>
+      <PageTitle>Đơn hàng của tôi</PageTitle>
 
       {orders.length === 0 ? (
-        <Empty>No orders found.</Empty>
+        <Empty>Không tìm thấy đơn nào.</Empty>
       ) : (
         orders.map((order) => {
           const deliveryStyle = getDeliveryStyle(order.delivery_status);
@@ -85,20 +85,39 @@ const MyOrders = () => {
             <OrderCard key={order._id}>
               {/* HEADER */}
               <OrderHeader>
-                <OrderId>Order #{order._id.slice(-8)}</OrderId>
+                <OrderId>Mã đơn hàng: #{order._id.slice(-8)}</OrderId>
 
                 <BadgeRow>
-                  <PaymentBadge $paid={order.payment_status === "paid"}>
-                    {order.payment_status}
-                  </PaymentBadge>
-
-                  <StatusBadge
-                    $bg={deliveryStyle.bg}
-                    $color={deliveryStyle.color}
-                    $border={deliveryStyle.border}
-                  >
-                    {order.delivery_status}
-                  </StatusBadge>
+                  {order.delivery_status === "cancelled" ? (
+                    <StatusBadge
+                      $bg="#FCEBEB"
+                      $color="#A32D2D"
+                      $border="#F7C1C1"
+                    >
+                      Đã hủy
+                    </StatusBadge>
+                  ) : (
+                    <>
+                      <PaymentBadge $paid={order.payment_status === "paid"}>
+                        {order.payment_status === "paid"
+                          ? "Đã thanh toán"
+                          : "Chờ thanh toán"}
+                      </PaymentBadge>
+                      <StatusBadge
+                        $bg={deliveryStyle.bg}
+                        $color={deliveryStyle.color}
+                        $border={deliveryStyle.border}
+                      >
+                        {order.delivery_status === "pending"
+                          ? "Chờ xử lý"
+                          : order.delivery_status === "delivering"
+                            ? "Đang giao"
+                            : order.delivery_status === "delivered"
+                              ? "Đã giao"
+                              : order.delivery_status}
+                      </StatusBadge>
+                    </>
+                  )}
                 </BadgeRow>
               </OrderHeader>
 
@@ -106,12 +125,12 @@ const MyOrders = () => {
               <Section>
                 <InfoGrid>
                   <InfoItem>
-                    <Label>Total</Label>
+                    <Label>Tổng số tiền:</Label>
                     <Value>{order.total?.toLocaleString("vi-VN")}₫</Value>
                   </InfoItem>
 
                   <InfoItem>
-                    <Label>Date</Label>
+                    <Label>Ngày tạo đơn:</Label>
                     <Value>
                       {new Date(order.createdAt).toLocaleString("en-GB")}
                     </Value>
@@ -123,7 +142,7 @@ const MyOrders = () => {
               {order.delivery_status !== "delivered" &&
                 order.delivery_status !== "cancelled" && (
                   <CancelBtn onClick={() => setConfirmId(order._id)}>
-                    Cancel Order
+                    Hủy đơn hàng
                   </CancelBtn>
                 )}
 
@@ -131,16 +150,16 @@ const MyOrders = () => {
 
               {/* SHIPPING */}
               <Section>
-                <SectionTitle>Shipping Info</SectionTitle>
+                <SectionTitle>Thông tin giao hàng:</SectionTitle>
 
                 <InfoGrid>
                   <InfoItem>
-                    <Label>Name</Label>
+                    <Label>Tên:</Label>
                     <Value>{order.shipping?.name}</Value>
                   </InfoItem>
 
                   <InfoItem>
-                    <Label>Address</Label>
+                    <Label>Địa chỉ:</Label>
                     <Value>
                       <div>{order.shipping?.address?.line1}</div>
 
@@ -151,7 +170,7 @@ const MyOrders = () => {
                   </InfoItem>
 
                   <InfoItem>
-                    <Label>City</Label>
+                    <Label>Thành phố:</Label>
                     <Value>{order.shipping?.address?.city}</Value>
                   </InfoItem>
                 </InfoGrid>
@@ -161,7 +180,7 @@ const MyOrders = () => {
 
               {/* PRODUCTS */}
               <Section>
-                <SectionTitle>Products</SectionTitle>
+                <SectionTitle>Sản phẩm đặt mua:</SectionTitle>
 
                 <ProductList>
                   {order.products?.map((item, index) => (
@@ -170,7 +189,7 @@ const MyOrders = () => {
 
                       <ProductInfo>
                         <ProductName>{item.name}</ProductName>
-                        <ProductMeta>Qty: {item.cartQuantity}</ProductMeta>
+                        <ProductMeta>Số lượng: {item.cartQuantity}</ProductMeta>
                         <ProductMeta>
                           {item.isDiscount && item.discountPercent > 0
                             ? (
@@ -192,14 +211,14 @@ const MyOrders = () => {
       {confirmId && (
         <ModalOverlay>
           <ModalBox>
-            <ModalTitle>Cancel Order</ModalTitle>
-            <ModalText>Are you sure you want to cancel this order?</ModalText>
+            <ModalTitle>Hủy đơn hàng</ModalTitle>
+            <ModalText>Bạn có chắc muốn hủy đơn hàng này không?</ModalText>
             <ModalActions>
               <ModalCancel onClick={() => setConfirmId(null)}>
-                Go back
+                Quay lại
               </ModalCancel>
               <ModalConfirm onClick={() => cancelOrder(confirmId)}>
-                Yes, cancel
+                Hủy đơn
               </ModalConfirm>
             </ModalActions>
           </ModalBox>
