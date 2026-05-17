@@ -35,7 +35,7 @@ const cartSlice = createSlice({
           action.payload.quantity || state.cartItems[itemIndex].quantity;
 
         if (currentQty >= stock) {
-          toast.error("Out of stock", {
+          toast.error("Sản phẩm đã hết hàng", {
             position: "bottom-left",
           });
           return;
@@ -43,20 +43,36 @@ const cartSlice = createSlice({
 
         state.cartItems[itemIndex].cartQuantity += 1;
 
-        toast.info(`Increased quantity of ${state.cartItems[itemIndex].name}`, {
+        toast.info(`Đã tăng số lượng của ${state.cartItems[itemIndex].name}`, {
           position: "bottom-left",
         });
       } else {
         if (action.payload.quantity === 0) {
-          toast.error("Product is out of stock", {
+          toast.error("Sản phẩm đã hết hàng", {
             position: "bottom-left",
           });
           return;
         }
 
         const tempProduct = {
-          ...action.payload,
+          _id: action.payload._id,
+
+          name: action.payload.name,
+
+          price: action.payload.price,
+
+          image: action.payload.image,
+
+          category: action.payload.category,
+
           shortDesc: action.payload.shortDesc || action.payload.desc,
+
+          quantity: action.payload.quantity,
+
+          isDiscount: action.payload.isDiscount,
+
+          discountPercent: action.payload.discountPercent,
+
           cartQuantity: 1,
         };
 
@@ -75,7 +91,7 @@ const cartSlice = createSlice({
       );
       state.cartItems = nextCartItems;
       // saveCart(state.cartItems, action.payload?.userId);
-      toast.error(`${action.payload.name} removed from cart`, {
+      toast.error(`Đã xóa ${action.payload.name} khỏi giỏ hàng`, {
         position: "bottom-left",
       });
     },
@@ -90,7 +106,7 @@ const cartSlice = createSlice({
       if (state.cartItems[itemIndex].cartQuantity > 1) {
         state.cartItems[itemIndex].cartQuantity -= 1;
 
-        toast.info(`Decreased quantity of ${state.cartItems[itemIndex].name}`, {
+        toast.info(`Đã giảm số lượng của ${state.cartItems[itemIndex].name}`, {
           position: "bottom-left",
         });
       } else {
@@ -100,7 +116,7 @@ const cartSlice = createSlice({
 
         state.cartItems = nextCartItems;
 
-        toast.error(`${action.payload.name} removed from cart`, {
+        toast.error(`Đã xóa ${action.payload.name} khỏi giỏ hàng`, {
           position: "bottom-left",
         });
       }
@@ -118,7 +134,7 @@ const cartSlice = createSlice({
       } else {
         localStorage.removeItem("cartItems");
       }
-      toast.error("Cart cleared", { position: "bottom-left" });
+      toast.error("Đã xóa giỏ hàng", { position: "bottom-left" });
     },
 
     resetCart: (state) => {

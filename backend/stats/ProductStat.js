@@ -1,5 +1,5 @@
 const router = require("express").Router();
-
+const Product = require("../models/product");
 const Order = require("../models/order");
 
 const { auth, isAdmin } = require("../middleware/auth");
@@ -36,7 +36,7 @@ router.get("/top-products", auth, isAdmin, async (req, res) => {
           },
 
           image: {
-            $first: "$products.image",
+            $last: "$products.image",
           },
 
           price: {

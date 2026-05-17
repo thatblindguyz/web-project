@@ -21,30 +21,22 @@ const userRoute = require("./routes/UserRoute");
 const manualOrderRoutes = require("./routes/ManualOrderRoute");
 const chatRoute = require("./routes/ChatRoute");
 const productStats = require("./stats/ProductStat");
+const exportRoute = require("./routes/ExportRoute");
 
 const app = express();
 
 app.set("trust proxy", 1);
 app.use(cors());
 
-app.use("/api/stripe", stripeRoute);
+app.use("/api/stripe/webhook", express.raw({ type: "application/json" }));
 
 /* ============================
    BODY PARSER
 ============================ */
+app.use(express.json({ limit: "20mb" }));
+app.use(express.urlencoded({ limit: "20mb", extended: true }));
 
-app.use(
-  express.json({
-    limit: "20mb",
-  }),
-);
-
-app.use(
-  express.urlencoded({
-    limit: "20mb",
-    extended: true,
-  }),
-);
+app.use("/api/stripe", stripeRoute);
 
 /* ============================
    API ROUTES
@@ -61,7 +53,7 @@ app.use("/api/users", userRoute);
 app.use("/api/manual-order", manualOrderRoutes);
 app.use("/api/chat", chatRoute);
 app.use("/api/products", productStats);
-
+app.use("/api/export", exportRoute);
 /* ============================
    STATIC FILES
 ============================ */

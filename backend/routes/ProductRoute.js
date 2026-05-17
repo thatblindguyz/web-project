@@ -24,7 +24,18 @@ router.post("/", isAdmin, async (req, res) => {
 
   try {
     if (!images || images.length === 0) {
-      return res.status(400).send("Images are required");
+      return res
+        .status(400)
+        .json({ message: "Vui lòng tải lên ít nhất 1 ảnh" });
+    }
+
+    //trùng code sản phẩm
+    const existingCode = await Product.findOne({
+      code: { $regex: new RegExp(`^${code.trim()}$`, "i") },
+    });
+
+    if (existingCode) {
+      return res.status(400).json({ message: "Mã sản phẩm đã tồn tại" });
     }
 
     const uploadedImages = await Promise.all(
@@ -36,6 +47,7 @@ router.post("/", isAdmin, async (req, res) => {
         return result.secure_url;
       }),
     );
+    const selectedIndex = images.findIndex((img) => img === image);
 
     const product = new Product({
       code,
@@ -45,8 +57,10 @@ router.post("/", isAdmin, async (req, res) => {
       desc,
       price,
       quantity,
+
       images: uploadedImages,
-      image: uploadedImages[0],
+
+      image: uploadedImages[selectedIndex >= 0 ? selectedIndex : 0],
     });
 
     const savedProduct = await product.save();
@@ -76,16 +90,45 @@ router.get("/", async (req, res) => {
 ============================ */
 
 router.get("/search", async (req, res) => {
-  const query = req.query.q;
+  const query = req.query.q?.trim();
 
   try {
     const products = await Product.find({
-      name: { $regex: query, $options: "i" }, // không phân biệt hoa thường
+      $or: [
+        {
+          name: {
+            $regex: query,
+            $options: "i",
+          },
+        },
+
+        {
+          category: {
+            $regex: query,
+            $options: "i",
+          },
+        },
+
+        {
+          shortDesc: {
+            $regex: query,
+            $options: "i",
+          },
+        },
+
+        {
+          desc: {
+            $regex: query,
+            $options: "i",
+          },
+        },
+      ],
     });
 
     res.status(200).send(products);
   } catch (err) {
     console.log(err);
+
     res.status(500).send(err.message);
   }
 });
@@ -109,6 +152,10 @@ router.get("/find/:id", async (req, res) => {
 
 router.delete("/:id", isAdmin, async (req, res) => {
   try {
+    const publicId = imageUrl.split("/").pop().split(".")[0];
+
+    await cloudinary.uploader.destroy(`products/${publicId}`);
+
     const deleted = await Product.findByIdAndDelete(req.params.id);
     res.status(200).send(deleted);
   } catch (err) {
@@ -165,13 +212,18 @@ router.put("/:id", isAdmin, async (req, res) => {
 
       updatedData.images = uploadedImages;
 
-      updatedData.image = image;
+      const selectedIndex = images.findIndex((img) => img === image);
+
+      updatedData.image =
+        uploadedImages[selectedIndex >= 0 ? selectedIndex : 0];
     }
 
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
       updatedData,
-      { new: true },
+      {
+        returnDocument: "after",
+      },
     );
 
     res.status(200).send(updatedProduct);

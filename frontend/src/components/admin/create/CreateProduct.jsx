@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { createProducts } from "../../../features/product/ProductSlice";
+import { useGetProductsQuery } from "../../../features/product/ProductAPI";
 
 /* ============================
    COMPONENT
@@ -10,7 +11,7 @@ import { createProducts } from "../../../features/product/ProductSlice";
 const CreateProduct = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { createStatus } = useSelector((state) => state.products);
+  const { createStatus, createError } = useSelector((state) => state.products);
 
   const [category, setCategory] = useState("");
   const [name, setName] = useState("");
@@ -18,6 +19,8 @@ const CreateProduct = () => {
   const [desc, setDesc] = useState(""); // FULL DESC
   const [shortDesc, setShortDesc] = useState(""); // ⭐ NEW
   const [priceError, setPriceError] = useState("");
+  const [codeError, setCodeError] = useState("");
+  const { data: existingProducts } = useGetProductsQuery();
   const [code, setCode] = useState("");
   const [quantity, setQuantity] = useState("");
   const [productImages, setProductImages] = useState([]);
@@ -59,17 +62,28 @@ const CreateProduct = () => {
   // };
 
   /* ================= SUBMIT ================= */
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // 1. Kiểm tra giá
     if (!price || price <= 0) {
-      setPriceError("Price must be greater than 0");
+      setPriceError("Giá phải lớn hơn 0");
       return;
     }
-
     setPriceError("");
 
-    dispatch(
+    // 2. Kiểm tra trùng mã (client-side)
+    const isDuplicate = existingProducts?.some(
+      (p) => p.code.trim().toLowerCase() === code.trim().toLowerCase(),
+    );
+    if (isDuplicate) {
+      setCodeError("Mã sản phẩm đã tồn tại");
+      return;
+    }
+    setCodeError("");
+
+    // 3. Dispatch
+    const result = await dispatch(
       createProducts({
         code,
         name,
@@ -79,20 +93,22 @@ const CreateProduct = () => {
         desc,
         quantity,
         image: productImages[selectedImage],
-
         images: productImages,
       }),
     );
 
-    // reset form
-    setName("");
-    setCode("");
-    setCategory("");
-    setPrice("");
-    setDesc("");
-    setShortDesc("");
-    setProductImages([]);
-    setQuantity("");
+    // Chỉ navigate khi thành công
+    if (result.meta.requestStatus === "fulfilled") {
+      setName("");
+      setCode("");
+      setCategory("");
+      setPrice("");
+      setDesc("");
+      setShortDesc("");
+      setProductImages([]);
+      setQuantity("");
+      navigate("/admin/products");
+    }
   };
 
   /* ================= UI ================= */
@@ -101,17 +117,17 @@ const CreateProduct = () => {
       <Header>
         <Left>
           <BackButton onClick={() => navigate(-1)}>← Quay lại</BackButton>
-          <PageTitle>Create Product</PageTitle>
+          <PageTitle>Tạo sản phẩm mới</PageTitle>
         </Left>
       </Header>
 
       <ContentRow>
         <Card>
-          <CardTitle>Product Info</CardTitle>
+          <CardTitle>Thông tin sản phẩm</CardTitle>
 
           <StyledForm onSubmit={handleSubmit} noValidate>
             <FieldGroup>
-              <FieldLabel>Product Image</FieldLabel>
+              <FieldLabel>Ảnh sản phẩm</FieldLabel>
               <FileInput
                 accept="image/*"
                 type="file"
@@ -122,14 +138,14 @@ const CreateProduct = () => {
             </FieldGroup>
 
             <FieldGroup>
-              <FieldLabel>Category</FieldLabel>
+              <FieldLabel>Danh mục</FieldLabel>
               <StyledSelect
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
                 required
               >
                 <option value="" disabled>
-                  Select Category
+                  Chọn danh mục
                 </option>
                 <option value="GPU">GPU</option>
                 <option value="RAM">RAM</option>
@@ -139,17 +155,21 @@ const CreateProduct = () => {
             </FieldGroup>
 
             <FieldGroup>
-              <FieldLabel>Product Code</FieldLabel>
+              <FieldLabel>Mã sản phẩm</FieldLabel>
               <StyledInput
                 type="text"
                 value={code}
-                onChange={(e) => setCode(e.target.value.toUpperCase())}
+                onChange={(e) => {
+                  setCode(e.target.value.toUpperCase());
+                  setCodeError("");
+                }}
                 required
               />
+              {codeError && <ErrorText>{codeError}</ErrorText>}
             </FieldGroup>
 
             <FieldGroup>
-              <FieldLabel>Name</FieldLabel>
+              <FieldLabel>Tên sản phẩm</FieldLabel>
               <StyledInput
                 type="text"
                 value={name}
@@ -159,7 +179,7 @@ const CreateProduct = () => {
             </FieldGroup>
 
             <FieldGroup>
-              <FieldLabel>Price (₫)</FieldLabel>
+              <FieldLabel>Giá (₫)</FieldLabel>
               <StyledInput
                 type="number"
                 value={price}
@@ -173,7 +193,7 @@ const CreateProduct = () => {
             </FieldGroup>
 
             <FieldGroup>
-              <FieldLabel>Quantity</FieldLabel>
+              <FieldLabel>Số lượng</FieldLabel>
               <StyledInput
                 type="number"
                 value={quantity}
@@ -184,10 +204,10 @@ const CreateProduct = () => {
 
             {/* SHORT DESC */}
             <FieldGroup>
-              <FieldLabel>Short Description</FieldLabel>
+              <FieldLabel>Mô tả ngắn gọn</FieldLabel>
               <StyledInput
                 type="text"
-                placeholder="Short description"
+                placeholder="Mô tả ngắn gọn của sản phẩm...."
                 value={shortDesc}
                 onChange={(e) => setShortDesc(e.target.value)}
                 required
@@ -196,45 +216,56 @@ const CreateProduct = () => {
 
             {/* FULL DESC */}
             <FieldGroup>
-              <FieldLabel>Full Description</FieldLabel>
+              <FieldLabel>Mô tả chi tiết</FieldLabel>
               <StyledTextarea
                 rows={6}
-                placeholder="Enter full product specs..."
+                placeholder="Mô tả chi tiết của sản phẩm...."
                 value={desc}
                 onChange={(e) => setDesc(e.target.value)}
                 required
               />
             </FieldGroup>
-
+            {createStatus === "rejected" && createError && (
+              <ErrorText style={{ textAlign: "center" }}>
+                {createError}
+              </ErrorText>
+            )}
             <SubmitButton type="submit" disabled={createStatus === "pending"}>
-              {createStatus === "pending" ? "Submitting..." : "Create Product"}
+              {createStatus === "pending" ? "Đang thêm..." : "Thêm sản phẩm"}
             </SubmitButton>
           </StyledForm>
         </Card>
 
         <Card>
-          <CardTitle>Image Preview</CardTitle>
+          <CardTitle>Ảnh sản phẩm</CardTitle>
           <ImagePreview>
             {productImages.length > 0 ? (
-              <PreviewGrid>
-                {productImages.map((img, index) => (
-                  <PreviewItem
-                    key={index}
-                    $active={selectedImage === index}
-                    onClick={() => setSelectedImage(index)}
-                  >
-                    <img src={img} alt="" />
+              <>
+                {/* ẢNH LỚN PREVIEW */}
+                <MainPreview>
+                  <img src={productImages[selectedImage]} alt="preview" />
+                </MainPreview>
 
-                    {selectedImage === index && (
-                      <SelectedBadge>Ảnh đại diện</SelectedBadge>
-                    )}
-                  </PreviewItem>
-                ))}
-              </PreviewGrid>
+                {/* THUMBNAIL GRID */}
+                <PreviewGrid>
+                  {productImages.map((img, index) => (
+                    <PreviewItem
+                      key={index}
+                      $active={selectedImage === index}
+                      onClick={() => setSelectedImage(index)}
+                    >
+                      <img src={img} alt="" />
+                      {selectedImage === index && (
+                        <SelectedBadge>Ảnh đại diện</SelectedBadge>
+                      )}
+                    </PreviewItem>
+                  ))}
+                </PreviewGrid>
+              </>
             ) : (
               <Placeholder>
                 <PlaceholderIcon>🖼</PlaceholderIcon>
-                <p>Upload an image to see preview</p>
+                <p>Tải ảnh lên để xem trước</p>
               </Placeholder>
             )}
           </ImagePreview>
@@ -456,14 +487,26 @@ const SubmitButton = styled.button`
 /* ===== IMAGE PREVIEW ===== */
 const ImagePreview = styled.div`
   flex: 1;
-  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-radius: 8px;
+  border: 1px dashed #e2e8f0;
+  background: #f8fafc;
+  padding: 12px;
+  overflow: hidden;
+`;
+
+const MainPreview = styled.div`
+  width: 100%;
+  height: 240px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 8px;
-  border: 1px dashed #e2e8f0;
-  background: #f8fafc;
   overflow: hidden;
+  background: #fff;
+  border: 1px solid #e2e8f0;
 
   img {
     max-width: 100%;

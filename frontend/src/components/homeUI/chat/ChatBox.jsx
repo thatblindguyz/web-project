@@ -24,9 +24,8 @@ const ChatBox = () => {
       if (!open) {
         const adminMessages = newMessages.filter((m) => m.isAdmin);
         const newAdminCount = adminMessages.length;
-        if (newAdminCount > prevCountRef.current) {
+        if (newAdminCount > prevCountRef.current)
           setUnread((prev) => prev + (newAdminCount - prevCountRef.current));
-        }
         prevCountRef.current = newAdminCount;
       }
       setMessages(newMessages);
@@ -76,12 +75,16 @@ const ChatBox = () => {
     <Wrapper>
       {open && (
         <Container>
+          {/* ── Header ── */}
           <Header>
             <HeaderLeft>
               <Avatar>TC</Avatar>
               <HeaderInfo>
                 <HeaderTitle>Hỗ trợ khách hàng</HeaderTitle>
-                <HeaderSub>Thường phản hồi trong vài phút</HeaderSub>
+                <StatusRow>
+                  <StatusDot />
+                  <HeaderSub>Thường phản hồi trong vài phút</HeaderSub>
+                </StatusRow>
               </HeaderInfo>
             </HeaderLeft>
             <CloseBtn onClick={() => setOpen(false)}>
@@ -100,6 +103,8 @@ const ChatBox = () => {
               </svg>
             </CloseBtn>
           </Header>
+
+          {/* ── Messages ── */}
           <Messages>
             {!auth?._id ? (
               <Empty>Vui lòng đăng nhập để chat với chúng tôi</Empty>
@@ -118,6 +123,8 @@ const ChatBox = () => {
             )}
             <div ref={messagesEndRef} />
           </Messages>
+
+          {/* ── Input ── */}
           <Bottom>
             <Input
               value={text}
@@ -143,6 +150,8 @@ const ChatBox = () => {
           </Bottom>
         </Container>
       )}
+
+      {/* ── Toggle button ── */}
       {!open && (
         <ToggleBtn onClick={handleOpen}>
           <svg
@@ -169,7 +178,20 @@ const ChatBox = () => {
 
 export default ChatBox;
 
-const fadeIn = keyframes`from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}`;
+/* ═══════════════════════════════════
+   STYLED COMPONENTS
+═══════════════════════════════════ */
+
+const fadeIn = keyframes`
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+`;
+
+const pulse = keyframes`
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.5); }
+  50%       { box-shadow: 0 0 0 4px rgba(34,197,94,0); }
+`;
+
 const Wrapper = styled.div`
   position: fixed;
   right: 24px;
@@ -180,6 +202,8 @@ const Wrapper = styled.div`
   align-items: flex-end;
   gap: 12px;
 `;
+
+/* Toggle button */
 const ToggleBtn = styled.button`
   position: relative;
   display: flex;
@@ -190,21 +214,21 @@ const ToggleBtn = styled.button`
   border-radius: 999px;
   border: none;
   background: #1e293b;
-  color: #f8fafc;
+  color: white;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.25);
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.3);
   transition:
     background 0.15s,
     transform 0.1s;
-  &:hover {
-    background: #0f172a;
+  &:hover { background: #0f172a; }
   }
   &:active {
     transform: scale(0.97);
   }
 `;
+
 const UnreadBadge = styled.span`
   position: absolute;
   top: -6px;
@@ -222,22 +246,25 @@ const UnreadBadge = styled.span`
   padding: 0 4px;
   border: 2px solid white;
 `;
+
+/* Chat window */
 const Container = styled.div`
   width: 340px;
   height: 480px;
-  background: #ffffff;
+  background: white;
   border: 1px solid #e2e8f0;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 32px rgba(29, 78, 216, 0.12);
   display: flex;
   flex-direction: column;
   animation: ${fadeIn} 0.25s ease;
 `;
+
+/* Header */
 const Header = styled.div`
-  height: 62px;
+  height: 64px;
   background: #1e293b;
-  color: white;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -250,10 +277,11 @@ const HeaderLeft = styled.div`
   gap: 10px;
 `;
 const Avatar = styled.div`
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  background: #1d4ed8;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.4);
   color: white;
   font-size: 12px;
   font-weight: 700;
@@ -265,34 +293,49 @@ const Avatar = styled.div`
 const HeaderInfo = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 3px;
 `;
 const HeaderTitle = styled.span`
   font-size: 14px;
   font-weight: 700;
-  color: #f8fafc;
+  color: white;
+`;
+const StatusRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 5px;
+`;
+const StatusDot = styled.div`
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  animation: ${pulse} 2s ease-in-out infinite;
+  flex-shrink: 0;
 `;
 const HeaderSub = styled.span`
   font-size: 11px;
-  color: #94a3b8;
+  color: rgba(255, 255, 255, 0.7);
 `;
 const CloseBtn = styled.button`
   width: 30px;
   height: 30px;
   border: none;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
   border-radius: 8px;
-  color: #cbd5e1;
+  color: rgba(255, 255, 255, 0.8);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: background 0.15s;
   &:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.25);
     color: white;
   }
 `;
+
+/* Messages */
 const Messages = styled.div`
   flex: 1;
   overflow-y: auto;
@@ -319,7 +362,7 @@ const SenderAvatar = styled.div`
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: #1d4ed8;
+  background: #1e293b;
   color: white;
   font-size: 10px;
   font-weight: 700;
@@ -333,22 +376,32 @@ const Message = styled.div`
   padding: 8px 12px;
   border-radius: ${(p) =>
     p.$admin ? "4px 12px 12px 12px" : "12px 4px 12px 12px"};
-  background: ${(p) => (p.$admin ? "#ffffff" : "#1e293b")};
+  background: ${(p) => (p.$admin ? "white" : "#1e293b")};
   border: 1px solid ${(p) => (p.$admin ? "#e2e8f0" : "transparent")};
   p {
     margin: 0;
     font-size: 13.5px;
-    color: ${(p) => (p.$admin ? "#334155" : "#f1f5f9")};
+    color: ${(p) => (p.$admin ? "#334155" : "white")};
     line-height: 1.5;
   }
 `;
 const SenderName = styled.span`
   font-size: 11px;
   font-weight: 600;
-  color: ${(p) => (p.$admin ? "#64748b" : "#94a3b8")};
+  color: ${(p) => (p.$admin ? "#64748b" : "rgba(255,255,255,0.7)")};
   display: block;
   margin-bottom: 2px;
 `;
+const Empty = styled.div`
+  text-align: center;
+  color: #94a3b8;
+  font-size: 13px;
+  margin-top: 40px;
+  line-height: 1.6;
+  padding: 0 1rem;
+`;
+
+/* Input area */
 const Bottom = styled.div`
   height: 60px;
   border-top: 1px solid #e2e8f0;
@@ -369,10 +422,12 @@ const Input = styled.input`
   font-size: 13px;
   color: #0f172a;
   background: #f8fafc;
-  transition: border-color 0.15s;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
   &:focus {
-    border-color: #1d4ed8;
-    background: #fff;
+    border-color: #475569;
+    background: white;
   }
   &::placeholder {
     color: #94a3b8;
@@ -389,17 +444,10 @@ const SendBtn = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.15s;
+  transition:
+    background 0.15s,
+    transform 0.1s;
   flex-shrink: 0;
-  &:hover:not(:disabled) {
-    background: #0f172a;
+  &:hover:not(:disabled) { background: #0f172a; }
   }
-`;
-const Empty = styled.div`
-  text-align: center;
-  color: #94a3b8;
-  font-size: 13px;
-  margin-top: 40px;
-  line-height: 1.6;
-  padding: 0 1rem;
 `;

@@ -13,9 +13,9 @@ const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
    CREATE CHECKOUT SESSION
 ============================ */
 
+// Create customer
 router.post("/create-checkout-session", express.json(), async (req, res) => {
   try {
-    // Create customer
     const customer = await stripe.customers.create({
       metadata: {
         userId: req.body.userId,
@@ -28,39 +28,34 @@ router.post("/create-checkout-session", express.json(), async (req, res) => {
       },
     });
 
-    // Create line items
-    const line_items = req.body.items.map((item) => {
-      const discountedPrice =
-        item.isDiscount && item.discountPercent > 0
-          ? item.price * (1 - item.discountPercent / 100)
-          : item.price;
+    const line_items = await Promise.all(
+      req.body.items.map(async (item) => {
+        const product = await Product.findById(item._id);
+        console.log("Product image from DB:", product?.image);
+        const imageUrl = product?.image?.startsWith("http")
+          ? product.image
+          : null;
 
-      return {
-        price_data: {
-          currency: "vnd",
+        const discountedPrice =
+          item.isDiscount && item.discountPercent > 0
+            ? item.price * (1 - item.discountPercent / 100)
+            : item.price;
 
-          product_data: {
-            name: item.name,
-
-            images: [
-              item.image.startsWith("http")
-                ? item.image
-                : `${process.env.BASE_URL}/${item.image}`,
-            ],
-
-            description: item.shortDesc || item.desc,
-
-            metadata: {
-              id: item.id,
+        return {
+          price_data: {
+            currency: "vnd",
+            product_data: {
+              name: item.name,
+              ...(imageUrl && { images: [imageUrl] }),
+              description: item.shortDesc || item.desc,
+              metadata: { id: item._id },
             },
+            unit_amount: Math.round(discountedPrice),
           },
-
-          unit_amount: Math.round(discountedPrice),
-        },
-
-        quantity: item.cartQuantity,
-      };
-    });
+          quantity: item.cartQuantity,
+        };
+      }),
+    );
 
     // Create Stripe session
     const session = await stripe.checkout.sessions.create({
@@ -165,7 +160,10 @@ const createOrder = async (customer, data) => {
         shortDesc: product.shortDesc,
         desc: product.desc,
         price: product.price,
-        image: product.image,
+        image:
+          product.image ||
+          (Array.isArray(product.images) ? product.images[0] : ""),
+
         cartQuantity: item.quantity,
       });
 
@@ -226,7 +224,11 @@ let endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 router.post(
   "/webhook",
-  express.raw({ type: "application/json" }),
+
+  express.raw({
+    type: "application/json",
+  }),
+
   async (request, response) => {
     let event;
 

@@ -1,31 +1,31 @@
-import { useNavigate, Outlet } from "react-router-dom";
+import { useNavigate, useLocation, Outlet } from "react-router-dom";
 import styled from "styled-components";
 import { AdminHeaders, PrimaryButton } from "../common/commonStyled";
 
 const ProductAdmin = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const isCreating = location.pathname.includes("create-product");
 
   return (
     <StyledProducts>
-      {/* Header */}
       <AdminHeaders>
-        <h2>Products</h2>
-
-        <PrimaryButton
-          onClick={() => navigate("/admin/products/create-product")}
-        >
-          Create Product
-        </PrimaryButton>
+        <h2>Quản lý sản phẩm</h2>
+        {!isCreating && (
+          <PrimaryButton
+            onClick={() => navigate("/admin/products/create-product")}
+          >
+            + Thêm sản phẩm
+          </PrimaryButton>
+        )}
       </AdminHeaders>
-
       <Outlet />
     </StyledProducts>
   );
 };
 
 export default ProductAdmin;
-
-/* ================= STYLES ================= */
 
 const StyledProducts = styled.div`
   width: 100%;

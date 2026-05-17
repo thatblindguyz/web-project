@@ -18,7 +18,7 @@ router.post("/forgot-password", async (req, res) => {
     });
 
     if (!user) {
-      return res.status(404).send("User not found");
+      return res.status(404).send("Không tìm thấy người dùng!");
     }
 
     // CREATE TOKEN
@@ -145,7 +145,7 @@ router.post("/reset-password/:token", async (req, res) => {
     });
 
     if (!user) {
-      return res.status(400).send("Invalid or expired token");
+      return res.status(400).send("Token không hợp lệ hoặc đã hết hạn");
     }
 
     // HASH NEW PASSWORD
@@ -158,7 +158,7 @@ router.post("/reset-password/:token", async (req, res) => {
 
     await user.save();
 
-    res.send("Password reset successful");
+    res.send("Đặt lại mật khẩu thành công!");
   } catch (err) {
     console.log(err);
 

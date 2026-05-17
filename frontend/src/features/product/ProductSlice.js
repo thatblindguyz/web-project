@@ -12,6 +12,7 @@ const initialState = {
   status: null,
   createStatus: null,
   error: null,
+  createError: null,
 };
 
 /* ============================
@@ -49,9 +50,9 @@ export const createProducts = createAsyncThunk(
 
       return response.data;
     } catch (error) {
-      toast.error(error.response?.data);
-
-      return rejectWithValue(error.response?.data);
+      const message = error.response?.data?.message || "Lỗi tạo sản phẩm";
+      toast.error(message);
+      return rejectWithValue(message);
     }
   },
 );
@@ -133,23 +134,22 @@ const productsSlice = createSlice({
       })
 
       /* CREATE  */
-
-      .addCase(createProducts.pending, (state) => {
-        state.createStatus = "pending";
-      })
-
       .addCase(createProducts.fulfilled, (state, action) => {
         state.items.push(action.payload);
 
         state.createStatus = "success";
+        state.createError = null;
+        toast.success("Thêm sản phẩm thành công!");
+      })
 
-        toast.success("Product Created!");
+      .addCase(createProducts.pending, (state) => {
+        state.createStatus = "pending";
+        state.createError = null;
       })
 
       .addCase(createProducts.rejected, (state, action) => {
         state.createStatus = "rejected";
-
-        state.error = action.payload;
+        state.createError = action.payload;
       })
 
       /* UPDATE */
@@ -163,7 +163,7 @@ const productsSlice = createSlice({
           state.items[index] = action.payload;
         }
 
-        toast.success("Product Updated!");
+        toast.success("Cập nhật sản phẩm thành công!");
       })
 
       /* DELETE */
@@ -177,7 +177,7 @@ const productsSlice = createSlice({
 
         state.status = "success";
 
-        toast.success("Product Deleted!");
+        toast.success("Xóa sản phẩm thành công!");
       })
 
       .addCase(deleteProduct.rejected, (state, action) => {

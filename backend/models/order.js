@@ -10,7 +10,7 @@ const OrderSchema = new mongoose.Schema(
 
     customerId: { type: String },
 
-    paymentIntentID: { type: String },
+    paymentIntentId: { type: String },
 
     products: [
       {

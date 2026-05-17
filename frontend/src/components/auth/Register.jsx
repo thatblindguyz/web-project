@@ -5,33 +5,20 @@ import { registerUser } from "../../features/auth/AuthSlice";
 import { toast } from "react-toastify";
 import styled, { keyframes } from "styled-components";
 
-/* ============================
-   COMPONENT
-============================ */
 const Register = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const auth = useSelector((state) => state.auth);
   const [showPass, setShowPass] = useState(false);
 
-  const [user, setUser] = useState({
-    name: "",
-    email: "",
-    password: "",
-  });
+  const [user, setUser] = useState({ name: "", email: "", password: "" });
 
-  /* Redirect after register */
   useEffect(() => {
-    if (auth._id) {
-      navigate("/");
-    }
+    if (auth._id) navigate("/");
   }, [auth._id, navigate]);
 
-  /* Show error */
   useEffect(() => {
-    if (auth.registerStatus === "rejected") {
-      toast.error(auth.registerError);
-    }
+    if (auth.registerStatus === "rejected") toast.error(auth.registerError);
   }, [auth.registerStatus, auth.registerError]);
 
   const handleSubmit = (e) => {
@@ -44,7 +31,7 @@ const Register = () => {
   return (
     <Wrapper>
       <Card>
-        {/* ICON */}
+        {/* Icon */}
         <IconWrap>
           <svg
             width="28"
@@ -63,17 +50,17 @@ const Register = () => {
           </svg>
         </IconWrap>
 
-        <Title>Create account</Title>
-        <Sub>Sign up to get started</Sub>
+        <Title>Tạo tài khoản</Title>
+        <Sub>Đăng ký để bắt đầu mua sắm</Sub>
 
         <Form onSubmit={handleSubmit}>
-          {/* NAME */}
+          {/* Họ tên */}
           <FieldGroup>
-            <FieldLabel htmlFor="name">Full name</FieldLabel>
+            <FieldLabel htmlFor="name">Họ và tên</FieldLabel>
             <Input
               id="name"
               type="text"
-              placeholder="John Doe"
+              placeholder="Nguyễn Văn A"
               value={user.name}
               onChange={(e) => setUser({ ...user, name: e.target.value })}
               required
@@ -81,13 +68,13 @@ const Register = () => {
             />
           </FieldGroup>
 
-          {/* EMAIL */}
+          {/* Email */}
           <FieldGroup>
-            <FieldLabel htmlFor="email">Email address</FieldLabel>
+            <FieldLabel htmlFor="email">Địa chỉ email</FieldLabel>
             <Input
               id="email"
               type="email"
-              placeholder="you@example.com"
+              placeholder="ban@example.com"
               value={user.email}
               onChange={(e) => setUser({ ...user, email: e.target.value })}
               required
@@ -95,14 +82,14 @@ const Register = () => {
             />
           </FieldGroup>
 
-          {/* PASSWORD */}
+          {/* Mật khẩu */}
           <FieldGroup>
-            <FieldLabel htmlFor="password">Password</FieldLabel>
+            <FieldLabel htmlFor="password">Mật khẩu</FieldLabel>
             <InputWrap>
               <Input
                 id="password"
                 type={showPass ? "text" : "password"}
-                placeholder="At least 5 characters"
+                placeholder="Ít nhất 5 ký tự"
                 value={user.password}
                 onChange={(e) => setUser({ ...user, password: e.target.value })}
                 required
@@ -147,13 +134,11 @@ const Register = () => {
             </InputWrap>
           </FieldGroup>
 
-          {/* SUBMIT */}
           <SubmitBtn type="submit" disabled={isPending}>
-            {isPending ? <Spinner /> : "Create account"}
+            {isPending ? <Spinner /> : "Đăng ký"}
           </SubmitBtn>
         </Form>
 
-        {/* ERROR */}
         {auth.registerStatus === "rejected" && (
           <Alert>
             <svg
@@ -174,9 +159,12 @@ const Register = () => {
           </Alert>
         )}
 
-        {/* LOGIN LINK */}
+        <Divider>
+          <span>hoặc</span>
+        </Divider>
+
         <LoginRow>
-          Already have an account? <LoginLink to="/login">Sign in</LoginLink>
+          Đã có tài khoản? <LoginLink to="/login">Đăng nhập ngay</LoginLink>
         </LoginRow>
       </Card>
     </Wrapper>
@@ -185,29 +173,27 @@ const Register = () => {
 
 export default Register;
 
-/* ============================
-   STYLES
-============================ */
+/* ═══════════════════════════════════
+   STYLED COMPONENTS
+═══════════════════════════════════ */
+
 const fadeIn = keyframes`
-  from { opacity: 0; transform: translateY(12px); }
+  from { opacity: 0; transform: translateY(16px); }
   to   { opacity: 1; transform: translateY(0); }
 `;
-
-const spin = keyframes`
-  to { transform: rotate(360deg); }
-`;
+const spin = keyframes`to { transform: rotate(360deg); }`;
 
 const Wrapper = styled.div`
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f8fafc;
+  background: #f1f5f9;
   padding: 2rem;
 `;
 
 const Card = styled.div`
-  background: #ffffff;
+  background: white;
   border: 1px solid #e2e8f0;
   border-radius: 16px;
   padding: 2.5rem 2rem;
@@ -217,14 +203,14 @@ const Card = styled.div`
   flex-direction: column;
   align-items: center;
   gap: 1rem;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 24px rgba(29, 78, 216, 0.08);
   animation: ${fadeIn} 0.3s ease;
 `;
 
 const IconWrap = styled.div`
-  width: 52px;
-  height: 52px;
-  border-radius: 12px;
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
   background: #eff6ff;
   border: 1px solid #bfdbfe;
   display: flex;
@@ -236,7 +222,7 @@ const IconWrap = styled.div`
 
 const Title = styled.h2`
   font-size: 22px;
-  font-weight: 700;
+  font-weight: 800;
   color: #0f172a;
   margin: 0;
 `;
@@ -245,20 +231,6 @@ const Sub = styled.p`
   font-size: 14px;
   color: #64748b;
   margin: 0;
-`;
-
-const Alert = styled.div`
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  background: #fef2f2;
-  color: #dc2626;
-  border: 1px solid #fecaca;
 `;
 
 const Form = styled.form`
@@ -285,23 +257,23 @@ const InputWrap = styled.div`
 `;
 
 const Input = styled.input`
-  height: 42px;
+  height: 44px;
   width: 100%;
   padding: 0 40px 0 12px;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
-  font-size: 15px;
+  font-size: 14px;
   color: #0f172a;
   outline: none;
   box-sizing: border-box;
-  transition: border-color 0.15s;
-  background: ${(p) => (p.disabled ? "#f8fafc" : "#fff")};
-
+  background: ${(p) => (p.disabled ? "#f8fafc" : "white")};
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
   &:focus {
     border-color: #1d4ed8;
     box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.1);
   }
-
   &::placeholder {
     color: #94a3b8;
   }
@@ -319,28 +291,29 @@ const EyeBtn = styled.button`
   display: flex;
   align-items: center;
   padding: 0;
-
   &:hover {
     color: #475569;
   }
 `;
 
 const SubmitBtn = styled.button`
-  height: 44px;
-  background: ${(p) => (p.disabled ? "#e2e8f0" : "#1e293b")};
-  color: ${(p) => (p.disabled ? "#94a3b8" : "#f8fafc")};
+  height: 46px;
+  background: ${(p) => (p.disabled ? "#e2e8f0" : "#1d4ed8")};
+  color: ${(p) => (p.disabled ? "#94a3b8" : "white")};
   border: none;
   border-radius: 8px;
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: ${(p) => (p.disabled ? "not-allowed" : "pointer")};
-  transition: background 0.15s;
   display: flex;
   align-items: center;
   justify-content: center;
-
+  transition:
+    background 0.15s,
+    transform 0.15s;
   &:hover:not(:disabled) {
-    background: #0f172a;
+    background: #1e40af;
+    transform: translateY(-1px);
   }
 `;
 
@@ -348,9 +321,43 @@ const Spinner = styled.div`
   width: 18px;
   height: 18px;
   border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: #fff;
+  border-top-color: white;
   border-radius: 50%;
   animation: ${spin} 0.7s linear infinite;
+`;
+
+const Alert = styled.div`
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  box-sizing: border-box;
+`;
+
+const Divider = styled.div`
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  &::before,
+  &::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #e2e8f0;
+  }
+  span {
+    font-size: 12px;
+    color: #94a3b8;
+    white-space: nowrap;
+  }
 `;
 
 const LoginRow = styled.p`
@@ -361,10 +368,9 @@ const LoginRow = styled.p`
 
 const LoginLink = styled(Link)`
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   color: #1d4ed8;
   text-decoration: none;
-
   &:hover {
     text-decoration: underline;
   }

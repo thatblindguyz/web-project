@@ -113,7 +113,7 @@ const UserOrderDetail = () => {
           }}
         >
           <img
-            src={item.image}
+            src={Array.isArray(item.image) ? item.image[0] : item.image}
             alt={item.name}
             width="60"
             height="60"
